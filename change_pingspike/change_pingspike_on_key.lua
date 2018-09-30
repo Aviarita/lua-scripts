@@ -6,6 +6,10 @@ local NewRef = ui.reference
 local SetVisible = ui.set_visible
 local AddEvent = client.set_event_callback
 
+local GetLocalPlayer = entity.get_local_player
+local GetAll = entity.get_all
+local GetProp = entity.get_prop
+
 local pingspike_cb, _, pingspike_slider = NewRef("misc", "miscellaneous", "ping spike")
 local new_pingspike_key = NewKey("misc", "miscellaneous", "New ping spike (on key press)")
 local new_pingspike_value = NewSlider("misc", "miscellaneous", "New ping spike (on key press)", 1, 750, 200)
@@ -31,3 +35,49 @@ AddEvent("run_command", function()
     SetVisible(new_pingspike_key, GetUi(pingspike_cb))
     SetVisible(new_pingspike_value, GetUi(pingspike_cb))
 end)
+
+-- credits to chay --
+
+time_start = globals.realtime()
+
+local function rgb_percents(percentage)
+    local r = 124 * 2 - 165 * percentage
+    local g = 260 * percentage
+    local b = 13
+    return r, g, b
+end
+
+AddEvent("paint", function(ctx)
+        
+    if GetLocalPlayer() == nil then return end
+       
+    if diff_old == nil then
+        diff_old = 0
+    end
+    
+    local player_resource = GetAll("CCSPlayerResource")[1]
+    local player = GetLocalPlayer()
+    local ping = GetProp(player_resource, "m_iPing", player)
+    local maxping = GetUi(new_pingspike_value)
+    local diff = math.floor(ping / maxping * 100)
+    
+    if diff_old ~= diff and globals.realtime() - time_start > 0.03 then
+        time_start = globals.realtime()
+        if diff_old > diff then i = -1 else i = 1 end
+        diff_old = diff_old + i
+    end
+    
+    if diff < 75 and diff > 0 then
+        r, g, b = rgb_percents(diff_old / 100)
+    elseif diff >= 75 then
+        r, g, b = 124, 195, 13
+    elseif diff < 0 then
+        r, g, b = 237, 27, 3
+    end
+    
+    client.draw_indicator(ctx, r, g, b, 255, "Cur: " .. ping)
+    
+    if GetUi(new_pingspike_key) == false then return end
+    client.draw_indicator(ctx, 124, 195, 13, 255, "Max: " .. maxping)
+end)
+
