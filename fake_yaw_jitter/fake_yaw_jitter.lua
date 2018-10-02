@@ -12,7 +12,7 @@ local aa, aaa = "AA", "Anti-aimbot angles"
 
 local ui = {
     yaw_jitter = NewCombo(aa, aaa, "Fake Yaw Jitter", {"Off", "Offset", "Center", "Random"}),
-    yaw_jitter_slider = NewSlider(aa, aaa, "Fake Yaw Jitter", -180, 180, 0),
+    yaw_jitter_slider = NewSlider(aa, aaa, "Fake Yaw Jitter Value", -180, 180, 0),
 }
 
 menu_fakeyaw_ref, menu_fakeyaw_offset_ref = NewRef(aa, aaa, "Fake yaw")
