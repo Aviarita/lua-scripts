@@ -21,12 +21,11 @@ local should_change = 0
 SetVisible(new_pingspike_key, false)
 SetVisible(new_pingspike_value, false)
 
-ui.set_callback(pingspike_cb, function()
-    SetVisible(new_pingspike_key, GetUi(pingspike_cb))
-    SetVisible(new_pingspike_value, GetUi(pingspike_cb))    
-end)
-
 AddEvent("run_command", function()
+        
+    SetVisible(new_pingspike_key, GetUi(pingspike_cb))
+    SetVisible(new_pingspike_value, GetUi(pingspike_cb))  
+        
     if GetUi(new_pingspike_key) then
         SetUi(pingspike_slider, GetUi(new_pingspike_value))
         should_change = 1
