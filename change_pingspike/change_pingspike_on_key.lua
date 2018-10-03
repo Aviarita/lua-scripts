@@ -56,10 +56,13 @@ AddEvent("paint", function(ctx)
     end
     
     local player_resource = GetAll("CCSPlayerResource")[1]
-    local player = GetLocalPlayer()
-    local ping = GetProp(player_resource, "m_iPing", player)
+    if player_resource == nil then return end
+    local ping = GetProp(player_resource, "m_iPing", GetLocalPlayer())
+    if ping == nil then return end
     local maxping = GetUi(new_pingspike_value)
+    if maxping == nil then return end
     local diff = math.floor(ping / maxping * 100)
+    if diff == nil then return end
     
     if diff_old ~= diff and globals.realtime() - time_start > 0.03 then
         time_start = globals.realtime()
