@@ -1,3 +1,5 @@
+require("libs/Vector3D")
+
 local GetUi = ui.get
 local SetUi = ui.set
 local NewSlider = ui.new_slider
@@ -45,9 +47,6 @@ local name, name_color = NewRef(vsls, plesp, "name")
 local weapon_text = NewRef(vsls, plesp, "weapon text")
 local distance = NewRef(vsls, plesp, "distance")
 
-local plist = NewRef("players", "players", "player list")
-local disable_visuals_ref = NewRef("players", "adjustments", "disable visuals")
-
 local flags_ref = NewRef(vsls, plesp, "flags")
 local ammo_ref, ammo_ref_color_ref = NewRef(vsls, plesp, "ammo")
 local weapon_icon_ref, weapon_icon_color_ref = NewRef(vsls, plesp, "weapon icon")
@@ -56,11 +55,14 @@ local activation_type_ref = NewRef(vsls, plesp, "activation type")
 
 local esp_builder_checkbox = NewCheckbox(vsls, plesp, "ESP Builder")
 local teammates_checkbox = NewCheckbox(vsls, plesp, "Teammates")
+local teammates_color = NewColor(vsls, plesp, "Teammates")
 
 local box_esp_modes = {
     "None",
-    "Box",
-    "Pentagram"
+    "2D",
+    "3D",
+    "Pentagon",
+    "Hexagon"
 }
 local box_mode_combo = NewCombo(vsls, plesp, "Bounding Box", box_esp_modes)
 local box_color = NewColor(vsls, plesp, "Bounding Box", 255, 255, 255, 200)
@@ -78,7 +80,9 @@ local healthbar_pos = {
     "Right",
     "Bottom",
     "Left",
-    "Text"
+    "Text",
+    "Gradient",
+    "Battery"
 }
 local healthbar_mode_multi = NewMultiselect(vsls, plesp, "Health bar", healthbar_pos)
 local healthbar_invis_cb = NewCheckbox(vsls, plesp, "Player behind wall(Health bar)")
@@ -88,7 +92,9 @@ local ammo_bar_pos = {
     "Right",
     "Bottom",
     "Left",
-    "Text"
+    "Text",
+    "Gradient",
+    "Battery"
 }
 local ammo_bar_mode_multi = NewMultiselect(vsls, plesp, "Ammo", ammo_bar_pos)
 local ammo_bar_color = NewColor(vsls, plesp, "Ammo", 80, 140, 200, 255)
@@ -409,6 +415,51 @@ local function get_max_ammo(entity_index)
     return max_ammo
 end
 
+local weaponids = {
+    CDEagle = "Desert Eagle/R8",
+    CWeaponElite = "Dual Berettas",
+    CWeaponFiveSeven = "Five-SeveN",
+    CWeaponGlock = "Glock-18",
+    CAK47 = "AK-47",
+    CWeaponAug = "AUG",
+    CWeaponAWP = "AWP",
+    CWeaponFamas = "FAMAS",
+    CWeaponG3SG1 = "G3SG1",
+    CWeaponGalilAR = "Galil AR",
+    CWeaponM249 = "M249",
+    CWeaponM4A1 = "M4",
+    CWeaponMAC10 = "MAC-10",
+    CWeaponP90 = "P90",
+    CWeaponUMP45 = "UMP-45",
+    CWeaponXM1014 = "XM1014",
+    CWeaponBizon = "PP-Bizon",
+    CWeaponMag7 = "MAG-7",
+    CWeaponNegev = "Negev",
+    CWeaponSawedoff = "Sawed-Off",
+    CWeaponTec9 = "Tec-9",
+    CWeaponHKP2000 = "P2000/USP-S",
+    CWeaponMP7 = "MP7/MP5",
+    CWeaponMP9 = "MP9",
+    CWeaponNOVA = "Nova",
+    CWeaponP250 = "P250/CZ75",
+    CWeaponSCAR20 = "SCAR-20",
+    CWeaponSG553 = "SG 553",
+    CWeaponSG556 = "SG 556",
+    CWeaponSSG08 = "SSG 08",
+    CWeaponTaser = "Taser",
+    CKnife = "Knife",
+    CHEGrenade = "HE",
+    CSmokeGrenade = "Smoke",
+    CDecoyGrenade = "Decoy",
+    CFlashbang = "Flash",
+    CIncendiaryGrenade = "Incendiary",
+    CMolotovGrenade = "Molotov",
+}
+
+local function get_weapon_name(weapon)
+    return weaponids[entity.get_classname(weapon)]
+end
+
 --credits to sapphyrus --
 local function contains(table, val)
     for i = 1, #table do
@@ -419,9 +470,9 @@ local function contains(table, val)
     return false
 end
 
-local radius = 20
-
 local function can_see(ent2)
+    local radius = 20
+    
     ent2_x, ent2_y, ent2_z = GetProp(ent2, "m_vecOrigin")
     local voZ = GetProp(ent2, "m_vecViewOffset[2]")
     
@@ -722,58 +773,6 @@ AddEvent("paint", function()
     overall_height_addition_bottom = height_addition_table[(GetUi(ammo_ref) and 1 or 0) .. (GetUi(lby_timer_ref) and 1 or 0) .. (GetUi(weapon_icon_ref) and 1 or 0)] or 0
 end)
 
-local function DrawPentagramEsp(ctx, entity_index)
-    
-    gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
-    
-    if gbb.topX == nil or gbb.topY == nil or gbb.botX == nil or gbb.botY == nil or gbb.alpha == nil or gbb.alpha == 0 then return end
-    
-    gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
-    
-    local half_w = gbb.width / 2
-    local middle = gbb.topX + gbb.width / 2
-
-    local add = math.sqrt(half_w * half_w + gbb.height * gbb.height)
-    add = add * 0.8
-
-    local is_visible = can_see(entity_index)
-    
-    local red, green, blue, alpha = GetUi(box_color)
-    
-    if not is_visible and GetUi(box_invis_cb) then
-        red, green, blue, alpha = GetUi(box_invis_color)
-    else
-        red, green, blue, alpha = GetUi(box_color)
-    end
-    
-    if not is_visible and GetUi(box_invis_cb) == false then
-        alpha = 0
-    end
-    
-    alpha = alpha * gbb.alpha
-    
-    local W = (GetUi(corner_width) / 200)
-    local H = (GetUi(corner_height) / 200)
-
-    DrawLine(ctx, middle, gbb.topY, gbb.topX, gbb.topY + gbb.height, red, green, blue, alpha) -- top -> bottom left
-    DrawLine(ctx, middle, gbb.topY, gbb.topX + gbb.width, gbb.topY + gbb.height, red, green, blue, alpha) -- top -> bottom right
-    DrawLine(ctx, middle - add / 2, gbb.topY + gbb.height / 3, middle + add / 2, gbb.topY + gbb.height / 3, red, green, blue, alpha) -- left -> right
-    DrawLine(ctx, gbb.topX, gbb.topY + gbb.height, middle + add / 2, gbb.topY + gbb.height / 3, red, green, blue, alpha) -- middle right -> bottom left
-    DrawLine(ctx, gbb.topX + gbb.width, gbb.topY + gbb.height, middle - add / 2, gbb.topY + gbb.height / 3, red, green, blue, alpha) -- middle left -> bottom right
-
-    DrawLine(ctx, middle - 1, gbb.topY - 1, gbb.topX - 1, gbb.topY + gbb.height + 2, 0, 0, 0, alpha) -- top -> bottom left
-    DrawLine(ctx, middle + 1, gbb.topY - 1, gbb.topX + gbb.width + 1, gbb.topY + gbb.height + 2, 0, 0, 0, alpha) -- top -> bottom right
-    DrawLine(ctx, middle - add / 2 - 2, gbb.topY + gbb.height / 3 - 1, middle + add / 2 + 2, gbb.topY + gbb.height / 3 - 1, 0, 0, 0, alpha) -- left -> right
-    DrawLine(ctx, gbb.topX - 1, gbb.topY + gbb.height + 3, middle + add / 2 + 3, gbb.topY + gbb.height / 3 - 1, 0, 0, 0, alpha) -- middle right -> bottom left
-    DrawLine(ctx, gbb.topX + gbb.width, gbb.topY + gbb.height + 2, middle - add / 2 - 2, gbb.topY + gbb.height / 3 - 1, 0, 0, 0, alpha) -- middle left -> bottom right
-
-    DrawLine(ctx, middle, gbb.topY + 5, gbb.topX + 2, gbb.topY + gbb.height - 2, 0, 0, 0, alpha) -- top -> bottom left
-    DrawLine(ctx, middle , gbb.topY + 5, gbb.topX + gbb.width - 2, gbb.topY + gbb.height - 2, 0, 0, 0, alpha) -- top -> bottom right
-    DrawLine(ctx, middle - add / 2 + 2, gbb.topY + gbb.height / 3 + 1, middle + add / 2 - 2, gbb.topY + gbb.height / 3 + 1, 0, 0, 0, alpha) -- left -> right
-    DrawLine(ctx, gbb.topX + 1, gbb.topY + gbb.height - 2, middle + add / 2 - 3, gbb.topY + gbb.height / 3 + 1, 0, 0, 0, alpha) -- middle right -> bottom left
-    DrawLine(ctx, gbb.topX + gbb.width - 2, gbb.topY + gbb.height - 3, middle - add / 2 + 3, gbb.topY + gbb.height / 3 + 1, 0, 0, 0, alpha) -- middle left -> bottom right
-end
-
 local function DrawBoxEsp(ctx, entity_index)
     
     gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
@@ -796,10 +795,11 @@ local function DrawBoxEsp(ctx, entity_index)
     end
     
     if not is_visible and GetUi(box_invis_cb) == false then
-        alpha = 0
+        return
     end
     
     alpha = alpha * gbb.alpha
+    local alpha2 = 255 * gbb.alpha
     
     local W = (GetUi(corner_width) / 200)
     local H = (GetUi(corner_height) / 200)
@@ -841,41 +841,219 @@ local function DrawBoxEsp(ctx, entity_index)
     -- Outlines
     
     if W > 0 then
-        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.topY + 1, gbb.topX + 1, gbb.topY + 1, 0, 0, 0, alpha) -- Top left inner width
-        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.topY - 1, gbb.topX - 1, gbb.topY - 1, 0, 0, 0, alpha) -- Top left outer width
+        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.topY + 1, gbb.topX + 1, gbb.topY + 1, 0, 0, 0, alpha2) -- Top left inner width
+        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.topY - 1, gbb.topX - 1, gbb.topY - 1, 0, 0, 0, alpha2) -- Top left outer width
         
-        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.topY + 1, gbb.botX - 2, gbb.topY + 1, 0, 0, 0, alpha) -- Top right inner width
-        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.topY - 1, gbb.botX, gbb.topY - 1, 0, 0, 0, alpha) -- Top right outer width
+        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.topY + 1, gbb.botX - 2, gbb.topY + 1, 0, 0, 0, alpha2) -- Top right inner width
+        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.topY - 1, gbb.botX, gbb.topY - 1, 0, 0, 0, alpha2) -- Top right outer width
         
-        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.botY - 2, gbb.topX + 1, gbb.botY - 2, 0, 0, 0, alpha) -- Bottom left inner width
-        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.botY, gbb.topX - 1, gbb.botY, 0, 0, 0, alpha) -- Bottom left outer width
+        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.botY - 2, gbb.topX + 1, gbb.botY - 2, 0, 0, 0, alpha2) -- Bottom left inner width
+        DrawLine(ctx, gbb.topX + (gbb.width * W), gbb.botY, gbb.topX - 1, gbb.botY, 0, 0, 0, alpha2) -- Bottom left outer width
         
-        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.botY - 2, gbb.botX - 2, gbb.botY - 2, 0, 0, 0, alpha) -- Bottom right inner width
-        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.botY, gbb.botX, gbb.botY, 0, 0, 0, alpha) -- Bottom right outer width
+        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.botY - 2, gbb.botX - 2, gbb.botY - 2, 0, 0, 0, alpha2) -- Bottom right inner width
+        DrawLine(ctx, gbb.botX - (gbb.width * W), gbb.botY, gbb.botX, gbb.botY, 0, 0, 0, alpha2) -- Bottom right outer width
     end
     
     if H > 0 then
-        DrawLine(ctx, gbb.topX + 1, gbb.topY + (gbb.height * H), gbb.topX + 1, gbb.topY + 1, 0, 0, 0, alpha) -- Top left inner height
-        DrawLine(ctx, gbb.topX - 1, gbb.topY + (gbb.height * H), gbb.topX - 1, gbb.topY - 1, 0, 0, 0, alpha) -- Top left outer height
+        DrawLine(ctx, gbb.topX + 1, gbb.topY + (gbb.height * H), gbb.topX + 1, gbb.topY + 1, 0, 0, 0, alpha2) -- Top left inner height
+        DrawLine(ctx, gbb.topX - 1, gbb.topY + (gbb.height * H), gbb.topX - 1, gbb.topY - 1, 0, 0, 0, alpha2) -- Top left outer height
         
-        DrawLine(ctx, gbb.botX - 2, gbb.topY + (gbb.height * H), gbb.botX - 2, gbb.topY + 1, 0, 0, 0, alpha) -- Top right inner height
-        DrawLine(ctx, gbb.botX, gbb.topY + (gbb.height * H), gbb.botX, gbb.topY - 1, 0, 0, 0, alpha) -- Top right outer height
+        DrawLine(ctx, gbb.botX - 2, gbb.topY + (gbb.height * H), gbb.botX - 2, gbb.topY + 1, 0, 0, 0, alpha2) -- Top right inner height
+        DrawLine(ctx, gbb.botX, gbb.topY + (gbb.height * H), gbb.botX, gbb.topY - 1, 0, 0, 0, alpha2) -- Top right outer height
         
-        DrawLine(ctx, gbb.topX + 1, gbb.botY - (gbb.height * H), gbb.topX + 1, gbb.botY - 2, 0, 0, 0, alpha) -- Bottom left inner height
-        DrawLine(ctx, gbb.topX - 1, gbb.botY - (gbb.height * H), gbb.topX - 1, gbb.botY, 0, 0, 0, alpha) -- Bottom left outer height
+        DrawLine(ctx, gbb.topX + 1, gbb.botY - (gbb.height * H), gbb.topX + 1, gbb.botY - 2, 0, 0, 0, alpha2) -- Bottom left inner height
+        DrawLine(ctx, gbb.topX - 1, gbb.botY - (gbb.height * H), gbb.topX - 1, gbb.botY, 0, 0, 0, alpha2) -- Bottom left outer height
         
-        DrawLine(ctx, gbb.botX - 2, gbb.botY - 2, gbb.botX - 2, gbb.botY - (gbb.height * H), 0, 0, 0, alpha) -- Bottom right inner height
-        DrawLine(ctx, gbb.botX, gbb.botY, gbb.botX, gbb.botY - (gbb.height * H), 0, 0, 0, alpha) -- Bottom right outer height
+        DrawLine(ctx, gbb.botX - 2, gbb.botY - 2, gbb.botX - 2, gbb.botY - (gbb.height * H), 0, 0, 0, alpha2) -- Bottom right inner height
+        DrawLine(ctx, gbb.botX, gbb.botY, gbb.botX, gbb.botY - (gbb.height * H), 0, 0, 0, alpha2) -- Bottom right outer height
     end
     
     if not is_visible and GetUi(fill_invis_cb) == false then
-        fill_alpha = 0
+        return
     end
     
     -- Fill
     if GetUi(fill_cb) then
         DrawRect(ctx, gbb.topX + 2, gbb.botY + 2 - gbb.height, gbb.width - 4, gbb.height - 4, fill_r, fill_g, fill_b, fill_alpha)
     end
+end
+
+local function Draw3DEsp(ctx, entity_index)
+    gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
+    
+    if gbb.topX == nil or gbb.topY == nil or gbb.botX == nil or gbb.botY == nil or gbb.alpha == nil or gbb.alpha == 0 then return end
+    
+    gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
+    
+    gbb.middle_x = (gbb.topX - gbb.botX) / 2
+    gbb.middle_y = (gbb.topY - gbb.botY) / 2
+    
+    local is_visible = can_see(entity_index)
+    
+    local red, green, blue, alpha = GetUi(box_color)
+    
+    if not is_visible and GetUi(box_invis_cb) then
+        red, green, blue, alpha = GetUi(box_invis_color)
+    else
+        red, green, blue, alpha = GetUi(box_color)
+    end
+    
+    if not is_visible and GetUi(box_invis_cb) == false then
+        return
+    end
+    
+    alpha = alpha * gbb.alpha
+    local alpha2 = 255 * gbb.alpha
+    
+    local origin = Vector3(GetProp(entity_index, "m_vecOrigin"))
+    local collision = (GetProp(entity_index, "m_Collision"))
+    local min = Vector3(GetProp(entity_index, "m_vecMins")) + origin
+    local max = Vector3(GetProp(entity_index, "m_vecMaxs")) + origin
+    
+    local points =
+    {
+        Vector3(min.x, min.y, min.z),
+        Vector3(min.x, max.y, min.z),
+        Vector3(max.x, max.y, min.z),
+        Vector3(max.x, min.y, min.z),
+        Vector3(min.x, min.y, max.z),
+        Vector3(min.x, max.y, max.z),
+        Vector3(max.x, max.y, max.z),
+        Vector3(max.x, min.y, max.z),
+    }
+    
+    local edges = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 0},
+        {5, 6}, {6, 7}, {1, 4}, {4, 8},
+        {0, 4}, {1, 5}, {2, 6}, {3, 7},
+    {5, 8}, {7, 8}, {3, 4}}
+    
+    for i = 1, #edges do
+        if points[edges[i][1]] ~= nil and points[edges[i][2]] ~= nil then
+            local p1 = Vector3(client.world_to_screen(ctx, points[edges[i][1]].x, points[edges[i][1]].y, points[edges[i][1]].z))
+            local p2 = Vector3(client.world_to_screen(ctx, points[edges[i][2]].x, points[edges[i][2]].y, points[edges[i][2]].z))
+            client.draw_line(ctx, p1.x, p1.y, p2.x, p2.y, red, green, blue, alpha)
+            client.draw_line(ctx, p1.x + 1, p1.y + 1, p2.x + 1, p2.y + 1, 0, 0, 0, alpha2)
+            client.draw_line(ctx, p1.x - 1, p1.y - 1, p2.x - 1, p2.y - 1, 0, 0, 0, alpha2)
+        end
+    end
+end
+
+local function DrawPentagonEsp(ctx, entity_index)
+    gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
+    
+    if gbb.topX == nil or gbb.topY == nil or gbb.botX == nil or gbb.botY == nil or gbb.alpha == nil or gbb.alpha == 0 then return end
+    
+    gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
+    
+    gbb.middle_x = (gbb.botX - gbb.topX) --/ 2
+    gbb.middle_y = (gbb.botY - gbb.topY) --/ 2
+    
+    local is_visible = can_see(entity_index)
+    
+    local red, green, blue, alpha = GetUi(box_color)
+    
+    if not is_visible and GetUi(box_invis_cb) then
+        red, green, blue, alpha = GetUi(box_invis_color)
+    else
+        red, green, blue, alpha = GetUi(box_color)
+    end
+    
+    if not is_visible and GetUi(box_invis_cb) == false then
+        return
+    end
+
+    alpha = alpha * gbb.alpha
+    local alpha2 = 255 * gbb.alpha
+
+    -- Lines
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8), gbb.topX - (gbb.width / 8), gbb.topY + (gbb.height / 3), red, green, blue, alpha)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8), gbb.topX + (gbb.width) + (gbb.width / 8), gbb.topY + (gbb.height / 3), red, green, blue, alpha)
+    
+    DrawLine(ctx, gbb.botX - (gbb.width - 10), gbb.topY + (gbb.height), gbb.topX - (gbb.width / 8), gbb.topY + (gbb.height / 3), red, green, blue, alpha)
+    DrawLine(ctx, gbb.botX - 10, gbb.topY + (gbb.height), gbb.topX + (gbb.width) + (gbb.width / 8), gbb.topY + (gbb.height / 3), red, green, blue, alpha)
+   
+    DrawLine(ctx, gbb.topX + (gbb.width - 10), gbb.botY, gbb.botX + 10 - (gbb.width), gbb.botY, red, green, blue, alpha)
+
+    -- Outlines
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8) - 2, gbb.topX - (gbb.width / 8) - 1, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8) - 2, gbb.topX + (gbb.width) + (gbb.width / 8) + 1, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    
+    DrawLine(ctx, gbb.botX - (gbb.width - 9), gbb.topY + (gbb.height) + 1, gbb.topX - (gbb.width / 8) - 1, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - 9, gbb.topY + (gbb.height) + 1, gbb.topX + (gbb.width) + (gbb.width / 8) + 1, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    
+    DrawLine(ctx, gbb.topX + (gbb.width - 9), gbb.botY + 1, gbb.botX + 9 - (gbb.width), gbb.botY + 1, 0, 0, 0, alpha2)
+
+    -- Inlines
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8) + 2, gbb.topX - (gbb.width / 8) + 2, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.topY - (gbb.height / 8) + 2, gbb.topX + (gbb.width) + (gbb.width / 8) - 2, gbb.topY + (gbb.height / 3), 0, 0, 0, alpha2)
+    
+    DrawLine(ctx, gbb.botX - (gbb.width - 11), gbb.topY + (gbb.height) - 1, gbb.topX - (gbb.width / 8) + 2, gbb.topY + (gbb.height / 3) - 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - 11, gbb.topY + (gbb.height) - 1, gbb.topX + (gbb.width) + (gbb.width / 8) - 2, gbb.topY + (gbb.height / 3) - 1, 0, 0, 0, alpha2)
+    
+    DrawLine(ctx, gbb.topX + (gbb.width - 11), gbb.botY - 1, gbb.botX + 11 - (gbb.width), gbb.botY - 1, 0, 0, 0, alpha2)
+end
+                   
+local function DrawHexagonEsp(ctx, entity_index)
+    gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
+    
+    if gbb.topX == nil or gbb.topY == nil or gbb.botX == nil or gbb.botY == nil or gbb.alpha == nil or gbb.alpha == 0 then return end
+    
+    gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
+    
+    gbb.middle_x = (gbb.topX - gbb.botX) / 2
+    gbb.middle_y = (gbb.topY - gbb.botY) / 2
+    
+    local is_visible = can_see(entity_index)
+    
+    local red, green, blue, alpha = GetUi(box_color)
+
+    if not is_visible and GetUi(box_invis_cb) then
+        red, green, blue, alpha = GetUi(box_invis_color)
+    else
+        red, green, blue, alpha = GetUi(box_color)
+    end
+    
+    if not is_visible and GetUi(box_invis_cb) == false then
+        return
+    end
+    
+    alpha = alpha * gbb.alpha
+    local alpha2 = 255 * gbb.alpha
+    
+    -- Lines
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12), gbb.topX, gbb.topY + (gbb.height / 4), red, green, blue, alpha)
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12), gbb.topX + gbb.width - 1, gbb.topY + (gbb.height / 4), red, green, blue, alpha)
+
+    DrawLine(ctx, gbb.topX, gbb.topY + (gbb.height / 4), gbb.botX - gbb.width, gbb.botY - (gbb.height / 4), red, green, blue, alpha)
+    DrawLine(ctx, gbb.botX - 1, gbb.topY + (gbb.height / 4), gbb.botX - 1, gbb.botY - (gbb.height / 4), red, green, blue, alpha)
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12), gbb.botX - gbb.width, gbb.botY - (gbb.height / 4), red, green, blue, alpha)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12), gbb.botX - 1, gbb.botY - (gbb.height / 4), red, green, blue, alpha)
+    
+    -- Outlines
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12) - 2, gbb.topX - 1, gbb.topY + (gbb.height / 4), 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12) - 2, gbb.topX + gbb.width, gbb.topY + (gbb.height / 4), 0, 0, 0, alpha2)
+
+    DrawLine(ctx, gbb.topX - 1, gbb.topY + (gbb.height / 4) - 1, gbb.botX - gbb.width - 1, gbb.botY - (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX, gbb.topY + (gbb.height / 4) - 1, gbb.botX, gbb.botY - (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12) + 2, gbb.botX - gbb.width - 1, gbb.botY - (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12) + 2, gbb.botX, gbb.botY - (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+
+
+    -- Inlines
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12) + 2, gbb.topX + 1, gbb.topY + (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.topX + (gbb.width / 2), gbb.topY - (gbb.height / 12) + 2, gbb.topX + gbb.width - 2, gbb.topY + (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+
+    DrawLine(ctx, gbb.topX + 1, gbb.topY + (gbb.height / 4), gbb.botX - gbb.width + 1, gbb.botY - (gbb.height / 4) + 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - 2, gbb.topY + (gbb.height / 4), gbb.botX - 2, gbb.botY - (gbb.height / 4), 0, 0, 0, alpha2)
+
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12) - 2, gbb.botX - gbb.width, gbb.botY - (gbb.height / 4) - 1, 0, 0, 0, alpha2)
+    DrawLine(ctx, gbb.botX - (gbb.width / 2), gbb.botY + (gbb.height / 12) - 2, gbb.botX - 2, gbb.botY - (gbb.height / 4), 0, 0, 0, alpha2)
 end
 
 local function DrawHealthbar(ctx, entity_index)
@@ -921,7 +1099,17 @@ local function DrawHealthbar(ctx, entity_index)
         DrawLine(ctx, gbb.topX - 1, gbb.topY - 4, gbb.topX + gbb.width, gbb.topY - 4, 0, 0, 0, alpha2) -- Bottom line
         DrawLine(ctx, gbb.topX + gbb.width, gbb.topY - 4, gbb.topX + gbb.width, gbb.topY - 7, 0, 0, 0, alpha2) -- Right line
         
-        DrawRect(ctx, gbb.topX, gbb.topY - 6, health_width, 2, red, green, 0, alpha2) -- Health
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.topX, gbb.topY - 6, health_width, 2, red, green, 0, alpha2, 0, 0, 0, alpha2, false)
+        else
+            DrawRect(ctx, gbb.topX, gbb.topY - 6, health_width, 2, red, green, 0, alpha2) -- Health
+        end
+        
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.topX + i * (gbb.width / 10), gbb.topY - 4, gbb.topX + i * (gbb.width / 10), gbb.topY - 7, 0, 0, 0, alpha2) -- Left line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.topX + health_width - 4, gbb.topY - 10, 255, 255, 255, alpha, "-", 999, enemy_health)
@@ -938,7 +1126,17 @@ local function DrawHealthbar(ctx, entity_index)
         DrawLine(ctx, gbb.botX + 6, gbb.topY - 1, gbb.botX + 6, gbb.botY, 0, 0, 0, alpha2) -- Right line
         DrawLine(ctx, gbb.botX + 3, gbb.botY, gbb.botX + 6, gbb.botY, 0, 0, 0, alpha2) -- Bottom line
         
-        DrawRect(ctx, gbb.botX + 4, gbb.botY - health_height, 2, health_height, red, green, 0, alpha2) -- Health
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX + 4, gbb.botY - health_height, 2, health_height, 0, 0, 0, alpha2, red, green, 0, alpha2, true)
+        else
+            DrawRect(ctx, gbb.botX + 4, gbb.botY - health_height, 2, health_height, red, green, 0, alpha2) -- Health
+        end
+        
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX + 3, gbb.topY + i * (gbb.height / 10), gbb.topX + gbb.width + 6, gbb.topY + i * (gbb.height / 10), 0, 0, 0, alpha2) -- Top line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.botX + 5, gbb.botY - health_height, 255, 255, 255, alpha, "-c", 999, enemy_health)
@@ -955,7 +1153,17 @@ local function DrawHealthbar(ctx, entity_index)
         DrawLine(ctx, gbb.botX - gbb.width - 1, gbb.botY + 6 + overall_height_addition_bottom, gbb.botX, gbb.botY + 6 + overall_height_addition_bottom, 0, 0, 0, alpha2) -- Bottom line
         DrawLine(ctx, gbb.botX, gbb.botY + 3 + overall_height_addition_bottom, gbb.botX, gbb.botY + 6 + overall_height_addition_bottom, 0, 0, 0, alpha2) -- Right line
         
-        DrawRect(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom, health_width, 2, red, green, 0, alpha2) -- Health
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom, health_width, 2, 0, 0, 0, alpha2, red, green, 0, alpha2, false)
+        else
+            DrawRect(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom, health_width, 2, red, green, 0, alpha2) -- Health
+        end
+        
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX - gbb.width + i * (gbb.width / 10), gbb.botY + 3 + overall_height_addition_bottom, gbb.botX - gbb.width + i * (gbb.width / 10), gbb.botY + 6 + overall_height_addition_bottom, 0, 0, 0, alpha2) -- Left line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.topX + health_width - 4, gbb.botY + 1 + overall_height_addition_bottom, 255, 255, 255, alpha, "-", 999, enemy_health)
@@ -972,7 +1180,17 @@ local function DrawHealthbar(ctx, entity_index)
         DrawLine(ctx, gbb.botX - gbb.width - 7, gbb.topY - 1, gbb.botX - gbb.width - 7, gbb.botY, 0, 0, 0, alpha2) -- Right line
         DrawLine(ctx, gbb.botX - gbb.width - 4, gbb.botY, gbb.botX - gbb.width - 7, gbb.botY, 0, 0, 0, alpha2) -- Bottom line
         
-        DrawRect(ctx, gbb.botX - gbb.width - 6, gbb.botY - health_height, 2, health_height, red, green, 0, alpha2) -- Health
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX - gbb.width - 6, gbb.botY - health_height, 2, health_height, red, green, 0, alpha2, 0, 0, 0, alpha2, true)
+        else
+            DrawRect(ctx, gbb.botX - gbb.width - 6, gbb.botY - health_height, 2, health_height, red, green, 0, alpha2) -- Health
+        end
+        
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX - gbb.width - 4, gbb.topY + i * (gbb.height / 10), gbb.topX - 7, gbb.topY + i * (gbb.height / 10), 0, 0, 0, alpha2) -- Top line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.botX - gbb.width - 10, gbb.botY - health_height - 4, 255, 255, 255, alpha, "-", 999, enemy_health)
@@ -1019,7 +1237,7 @@ local function DrawAmmo(ctx, entity_index)
     
     local alpha = 150 * gbb.alpha
     local alpha2 = 255 * gbb.alpha
-    local alpha3 = 255 * gbb.alpha
+    local alpha3 = alpha3 * gbb.alpha
     
     local ammo_width = (gbb.width * ammo) / max_ammo
     local ammo_height = (gbb.height * ammo) / max_ammo
@@ -1031,7 +1249,7 @@ local function DrawAmmo(ctx, entity_index)
         ["11"] = true
     }
     local healthbar_visible_check = false
-    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (contains(healthbar_activation_type, "Through walls") and 1 or 0)]
+    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (GetUi(healthbar_invis_cb) and 1 or 0)]
     
     local text_enabled = contains(activation_type, "Text") and ammo < max_ammo
     
@@ -1053,7 +1271,17 @@ local function DrawAmmo(ctx, entity_index)
         DrawLine(ctx, gbb.topX - 1, gbb.topY - 4 - height_addition, gbb.topX + gbb.width, gbb.topY - 4 - height_addition, 0, 0, 0, alpha2) -- Bottom line
         DrawLine(ctx, gbb.topX + gbb.width, gbb.topY - 4 - height_addition, gbb.topX + gbb.width, gbb.topY - 7 - height_addition, 0, 0, 0, alpha2) -- Right line
         
-        DrawRect(ctx, gbb.topX, gbb.topY - 6 - height_addition, ammo_width, 2, red, green, blue, alpha3) -- Ammo
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.topX, gbb.topY - 6 - height_addition, ammo_width, 2, red, green, blue, alpha3, 0, 0, 0, alpha3, false)
+        else
+            DrawRect(ctx, gbb.topX, gbb.topY - 6 - height_addition, ammo_width, 2, red, green, blue, alpha3) -- Ammo
+        end
+
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.topX + i * (gbb.width / 10), gbb.topY - 4 - height_addition, gbb.topX + i * (gbb.width / 10), gbb.topY - 7 - height_addition, 0, 0, 0, alpha2) -- Left line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.topX + ammo_width - 4, gbb.topY - 10 - height_addition, 255, 255, 255, alpha, "-", 999, ammo)
@@ -1078,7 +1306,17 @@ local function DrawAmmo(ctx, entity_index)
         DrawLine(ctx, gbb.botX + 6 + width_addition, gbb.topY - 1, gbb.botX + 6 + width_addition, gbb.botY, 0, 0, 0, alpha2) -- Right line
         DrawLine(ctx, gbb.botX + 3 + width_addition, gbb.botY, gbb.botX + 6 + width_addition, gbb.botY, 0, 0, 0, alpha2) -- Bottom line
         
-        DrawRect(ctx, gbb.botX + 4 + width_addition, gbb.botY - ammo_height, 2, ammo_height, red, green, blue, alpha3) -- Ammo
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX + 4 + width_addition, gbb.botY - ammo_height, 2, ammo_height, 0, 0, 0, alpha3, red, green, blue, alpha3, true)
+        else
+            DrawRect(ctx, gbb.botX + 4 + width_addition, gbb.botY - ammo_height, 2, ammo_height, red, green, blue, alpha3) -- Ammo
+        end
+
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX + 3 + width_addition, gbb.topY + i * (gbb.height / 10), gbb.topX + gbb.width + 6 + width_addition, gbb.topY + i * (gbb.height / 10), 0, 0, 0, alpha2) -- Top line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.botX + 5 + width_addition, gbb.botY - ammo_height, 255, 255, 255, alpha, "-c", 999, ammo)
@@ -1103,7 +1341,17 @@ local function DrawAmmo(ctx, entity_index)
         DrawLine(ctx, gbb.botX - gbb.width - 1, gbb.botY + 6 + overall_height_addition_bottom + height_addition, gbb.botX, gbb.botY + 6 + overall_height_addition_bottom + height_addition, 0, 0, 0, alpha2) -- Bottom line
         DrawLine(ctx, gbb.botX, gbb.botY + 3 + overall_height_addition_bottom + height_addition, gbb.botX, gbb.botY + 6 + overall_height_addition_bottom + height_addition, 0, 0, 0, alpha2) -- Right line
         
-        DrawRect(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom + height_addition, ammo_width, 2, red, green, blue, alpha3) -- Ammo
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom + height_addition, ammo_width, 2, 0, 0, 0, alpha3, red, green, blue, alpha3, false)
+        else
+            DrawRect(ctx, gbb.botX - gbb.width, gbb.botY + 4 + overall_height_addition_bottom + height_addition, ammo_width, 2, red, green, blue, alpha3) -- Ammo
+        end
+
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX - gbb.width + i * (gbb.width / 10), gbb.botY + 3 + overall_height_addition_bottom + height_addition, gbb.botX - gbb.width + i * (gbb.width / 10), gbb.botY + 6 + overall_height_addition_bottom + height_addition, 0, 0, 0, alpha2) -- Left line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.topX + ammo_width - 4, gbb.botY + 1 + overall_height_addition_bottom + height_addition, 255, 255, 255, alpha, "-", 999, ammo)
@@ -1128,7 +1376,17 @@ local function DrawAmmo(ctx, entity_index)
         DrawLine(ctx, gbb.botX - gbb.width - 7 - width_subtraction, gbb.topY - 1, gbb.botX - gbb.width - 7 - width_subtraction, gbb.botY, 0, 0, 0, alpha2) -- Right line
         DrawLine(ctx, gbb.botX - gbb.width - 4 - width_subtraction, gbb.botY, gbb.botX - gbb.width - 7 - width_subtraction, gbb.botY, 0, 0, 0, alpha2) -- Bottom line
         
-        DrawRect(ctx, gbb.botX - gbb.width - 6 - width_subtraction, gbb.botY - ammo_height, 2, ammo_height, red, green, blue, alpha3) -- Ammo
+        if contains(activation_type, "Gradient") then
+            DrawGradient(ctx, gbb.botX - gbb.width - 6 - width_subtraction, gbb.botY - ammo_height, 2, ammo_height, red, green, blue, alpha3, 0, 0, 0, alpha3, true)
+        else
+            DrawRect(ctx, gbb.botX - gbb.width - 6 - width_subtraction, gbb.botY - ammo_height, 2, ammo_height, red, green, blue, alpha3) -- Ammo
+        end
+
+        if contains(activation_type, "Battery") then
+            for i = 1, 9, 1 do
+                DrawLine(ctx, gbb.botX - gbb.width - 4 - width_subtraction, gbb.topY + i * (gbb.height / 10), gbb.topX - 7 - width_subtraction, gbb.topY + i * (gbb.height / 10), 0, 0, 0, alpha2) -- Top line
+            end
+        end
         
         if text_enabled then
             DrawText(ctx, gbb.botX - gbb.width - 5 - width_subtraction, gbb.botY - ammo_height, 255, 255, 255, alpha, "-c", 999, ammo)
@@ -1196,7 +1454,7 @@ local function DrawName(ctx, entity_index)
         ["11"] = true
     }
     local healthbar_visible_check = false
-    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (contains(healthbar_activation_type, "Through walls") and 1 or 0)]
+    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (GetUi(healthbar_invis_cb) and 1 or 0)]
     
     local ammo_bar_visible_check_table = {
         ["01"] = true,
@@ -1336,8 +1594,7 @@ local function DrawWeapon(ctx, entity_index)
     end
     
     alpha = alpha * gbb.alpha
-    
-    local enemy_weapon = get_weapon(entity_index)
+    local enemy_weapon = get_weapon_name(entity.get_player_weapon(entity_index))
     
     local weapon_flags = "cb"
     local weapon_flags_left = "rb"
@@ -1364,7 +1621,7 @@ local function DrawWeapon(ctx, entity_index)
         ["11"] = true
     }
     local healthbar_visible_check = false
-    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (contains(healthbar_activation_type, "Through walls") and 1 or 0)]
+    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (GetUi(healthbar_invis_cb) and 1 or 0)]
     
     local name_visible_check_table = {
         ["01"] = true,
@@ -1568,7 +1825,7 @@ local function DrawDistance(ctx, entity_index)
         ["11"] = true
     }
     local healthbar_visible_check = false
-    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (contains(healthbar_activation_type, "Through walls") and 1 or 0)]
+    healthbar_visible_check = healthbar_visible_check_table[(is_visible and 1 or 0) .. (GetUi(healthbar_invis_cb) and 1 or 0)]
     
     local name_visible_check_table = {
         ["01"] = true,
@@ -1843,18 +2100,16 @@ AddEvent("paint", function(ctx)
             
             if enabled and activation_type_ref then
                 
-                SetUi(plist, 1)
-                local disable_visuals_enabled = GetUi(disable_visuals_ref)
-                
-                if disable_visuals_enabled == true then return end
-                
-                if GetUi(box_mode_combo) == "Box" then
+                if GetUi(box_mode_combo) == "2D" then
                     DrawBoxEsp(ctx, player)
-                end   
-
-                if GetUi(box_mode_combo) == "Pentagram" then
-                    DrawPentagramEsp(ctx, player)
+                elseif GetUi(box_mode_combo) == "3D" then
+                    Draw3DEsp(ctx, player)
+                elseif GetUi(box_mode_combo) == "Pentagon" then
+                    DrawPentagonEsp(ctx, player)
+                elseif GetUi(box_mode_combo) == "Hexagon" then
+                    DrawHexagonEsp(ctx, player)
                 end
+                
                 DrawHealthbar(ctx, player)
                 DrawAmmo(ctx, player)
                 DrawName(ctx, player)
@@ -1870,6 +2125,7 @@ end)
 local function set_invisible()
     SetVisible(box_mode_combo, false)
     SetVisible(teammates_checkbox, false)
+    SetVisible(teammates_color, false)
     SetVisible(box_color, false)
     SetVisible(box_invis_cb, false)
     SetVisible(box_invis_color, false)
@@ -1911,8 +2167,9 @@ set_invisible()
 
 AddEvent("paint", function()
     local enabled = GetUi(esp_builder_checkbox)
-    local box_mode_box = GetUi(box_mode_combo) == "Box"  and enabled
-    local box_mode_pentagram = GetUi(box_mode_combo) == "Pentagram"  and enabled
+    local box_mode = GetUi(box_mode_combo) ~= "None" and enabled
+    local box_mode2d = GetUi(box_mode_combo) == "2D" and enabled
+    local box_mode3d = GetUi(box_mode_combo) == "3D" and enabled
     
     local name_esp_enabled = not table.empty(GetUi(name_esp_multi)) and enabled
     local weapon_esp_enabled = not table.empty(GetUi(weapon_esp_multi)) and enabled
@@ -1922,17 +2179,18 @@ AddEvent("paint", function()
     
     SetVisible(box_mode_combo, enabled)
     SetVisible(teammates_checkbox, enabled)
-    SetVisible(box_color, box_mode_box or box_mode_pentagram)
-    SetVisible(box_invis_cb, box_mode_box or box_mode_pentagram)
-    SetVisible(box_invis_color, box_mode_box or box_mode_pentagram)
+    SetVisible(teammates_color, enabled)
+    SetVisible(box_color, box_mode)
+    SetVisible(box_invis_cb, box_mode)
+    SetVisible(box_invis_color, box_mode)
     
-    SetVisible(corner_width, box_mode_box)
-    SetVisible(corner_height, box_mode_box)
+    SetVisible(corner_width, box_mode2d)
+    SetVisible(corner_height, box_mode2d)
     
-    SetVisible(fill_cb, box_mode_box)
-    SetVisible(fill_color, box_mode_box)
-    SetVisible(fill_invis_cb, GetUi(fill_cb) and box_mode_box)
-    SetVisible(fill_invis_color, GetUi(fill_cb) and box_mode_box)
+    SetVisible(fill_cb, box_mode2d)
+    SetVisible(fill_color, box_mode2d)
+    SetVisible(fill_invis_cb, GetUi(fill_cb) and box_mode2d)
+    SetVisible(fill_invis_color, GetUi(fill_cb) and box_mode2d)
     
     SetVisible(healthbar_mode_multi, enabled)
     SetVisible(healthbar_invis_cb, health_bar_enabled)
@@ -1967,22 +2225,20 @@ local execute_once = true
 AddEvent("paint", function()
     
     local enabled = GetUi(esp_builder_checkbox)
-    local box_mode_box = GetUi(box_mode_combo) == "Box" and enabled
-    
+    local box_mode = GetUi(box_mode_combo) ~= "Off" and enabled
     local healthbar_enabled = not table.empty(GetUi(healthbar_mode_multi)) and enabled
     local ammo_bar_enabled = not table.empty(GetUi(ammo_bar_mode_multi)) and enabled
     local name_esp_enabled = not table.empty(GetUi(name_esp_multi)) and enabled
     local weapon_esp_enabled = not table.empty(GetUi(weapon_esp_multi)) and enabled
     local distance_esp_enabled = not table.empty(GetUi(distance_esp_multi)) and enabled
     
-    SetVisible(bounding_box, not enabled)
-    SetVisible(bounding_box_color, not enabled)
+    SetVisible(bounding_box, not box_mode)
+    SetVisible(bounding_box_color, not box_mode)
     SetVisible(health_bar, not enabled)
     SetVisible(name, not enabled)
     SetVisible(name_color, not enabled)
     SetVisible(weapon_text, not enabled)
     SetVisible(distance, not enabled)
-    
     SetVisible(teammate_ref, not enabled)
     
     if enabled then
