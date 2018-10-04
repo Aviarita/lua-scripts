@@ -1,4 +1,14 @@
-require("libs/Vector3D")
+local can_use_3d_box = true
+local vector3d, err = pcall(require, "libs/Vector3D")
+if err and vector3d == false then
+    vector3d, err = pcall(require, "Vector3D")
+    if err and vector3d == false then
+        client.log("Please download https://gamesense.pub/forums/viewtopic.php?id=5464 to use this script")
+        client.log(err)
+        can_use_3d_box = false
+    end
+end
+
 
 local GetUi = ui.get
 local SetUi = ui.set
@@ -879,6 +889,12 @@ local function DrawBoxEsp(ctx, entity_index)
 end
 
 local function Draw3DEsp(ctx, entity_index)
+
+    if can_use_3d_box == false then
+        Log("Please download https://gamesense.pub/forums/viewtopic.php?id=5464 to use 3D box esp")
+        return
+    end
+
     gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = GetBoundingBox(ctx, entity_index)
     
     if gbb.topX == nil or gbb.topY == nil or gbb.botX == nil or gbb.botY == nil or gbb.alpha == nil or gbb.alpha == 0 then return end
