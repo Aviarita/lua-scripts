@@ -1,7 +1,7 @@
 local GetUi = ui.get
 local SetUi = ui.set
 local NewSlider = ui.new_slider
-local NewCheckbox = ui.new_checkbox
+local NewCombo = ui.new_combobox
 local NewColor = ui.new_color_picker
 local NewMultiselect = ui.new_multiselect
 local NewRef = ui.reference
@@ -27,8 +27,9 @@ local screen = {
 screen.x, screen.y = client.screen_size()
 
 local ui = {
-    multiselect = NewMultiselect("misc", "miscellaneous", "Damage taken indicator", {"Onscreen Text", "Skeleton", "Container", "Console"}),
+    multiselect = NewMultiselect("misc", "miscellaneous", "Damage taken indicator", {"Onscreen Text", "Skeleton", "Container", "Console", "Thirdperson hitbox"}),
     color = NewColor("misc", "miscellaneous", "Damage taken indicator", 200, 200, 200, 255),
+    attach = NewCombo("misc", "miscellaneous", "Attach skeleton to container", {"Off", "Left", "Right", "Top", "Bottom"}),
     box_x = NewSlider("misc", "miscellaneous", "Container position x", 0, screen.x, 300),
     box_y = NewSlider("misc", "miscellaneous", "Container position y", 0, screen.y, 300), 
     skelet_x = NewSlider("misc", "miscellaneous", "Skeleton position x", 0, screen.x, 300),
@@ -73,6 +74,21 @@ local function contains(table, val)
     return false
 end
 
+local function is_thirdperson(ctx)
+    local x, y, z = client.eye_position()
+    local pitch, yaw = client.camera_angles()
+    
+    yaw = yaw - 180
+    pitch, yaw = math.rad(pitch), math.rad(yaw)
+
+    x = x + math.cos(yaw)*4
+    y = y + math.sin(yaw)*4
+    z = z + math.sin(pitch)*4
+
+    local wx, wy = client.world_to_screen(ctx, x, y, z)
+    return wx ~= nil
+end
+
 local hitgroup_names = {
     "body", "head", "chest",
     "stomach", "left arm", "right arm",
@@ -81,6 +97,7 @@ local hitgroup_names = {
 }
 
 local player_hurt = {
+	userid,
     attacker,
     health,
     armor,
@@ -102,6 +119,7 @@ AddEvent("player_hurt", function(event)
     
     if UidToEntIndex(userid) == GetLocalPlayer() then
 
+    	player_hurt.userid = UidToEntIndex(userid)
         player_hurt.attacker = UidToEntIndex(attacker)
         player_hurt.health = health
         player_hurt.armor = armor
@@ -130,6 +148,8 @@ AddEvent("player_hurt", function(event)
             end
         	
             table.insert(logs, message)
+
+
         end
     end
 end)
@@ -149,8 +169,10 @@ AddEvent("paint", function(ctx)
 
     SetVisible(ui.box_x, contains(activation_type, "Container"))
     SetVisible(ui.box_y, contains(activation_type, "Container")) 
-    SetVisible(ui.skelet_x, contains(activation_type, "Skeleton"))
-    SetVisible(ui.skelet_y, contains(activation_type, "Skeleton"))
+    SetVisible(ui.skelet_x, contains(activation_type, "Skeleton") and GetUi(ui.attach) == "Off")
+    SetVisible(ui.skelet_y, contains(activation_type, "Skeleton") and GetUi(ui.attach) == "Off")
+
+    SetVisible(ui.attach, contains(activation_type, "Skeleton") and contains(activation_type, "Container"))
 
     local box_x = GetUi(ui.box_x)
     local box_y = GetUi(ui.box_y)
@@ -191,7 +213,40 @@ AddEvent("paint", function(ctx)
         	DrawText(ctx, screen.x - (screen.x / 2.25), screen.y - (screen.y / 2.8), r, g, b, 255, "+", 999, "-" .. player_hurt.dmg_health .. " RIGHT LEG")
     	end
     end
+    if contains(activation_type, "Container") then
+    	local r, g, b, a = GetUi(ui.color)
+       
+        draw_container(ctx, box_x, box_y, 410, 30 + height_add + 2)
+        DrawText(ctx, box_x + 180, box_y + 7, 103, 170, 6, 255, "b", 999, "Damage log")
+        for i = 1, #logs do
+           	DrawText(ctx, box_x + 10, box_y + 10 + (10 * i), r, g, b, a, "", 400, logs[i])
+           	if i > 6 then
+           		table.remove( logs, 1)
+       	 	end
+       	 	height_add = (i * 10)
+    		local now = realtime()
+    		if lasttime < now - 1 then
+    		    table.remove(logs, 1) 
+    		    lasttime = now
+    		end
+        end       	
+    end
     if contains(activation_type, "Skeleton") then -- dont look at the code pls
+
+        if GetUi(ui.attach) == "Left" then
+    		skeleton_y = box_y
+    		skeleton_x = box_x - 151
+    	elseif GetUi(ui.attach) == "Right" then
+    		skeleton_y = box_y
+    		skeleton_x = box_x + 411
+    	elseif GetUi(ui.attach) == "Top" then
+    		skeleton_y = box_y - 251
+    		skeleton_x = box_x
+    	elseif GetUi(ui.attach) == "Bottom" then
+    		skeleton_y = box_y + height_add + 33
+    		skeleton_x = box_x
+    	end
+
     	local r, g, b, a = 255, 255, 255, 255
     	draw_container(ctx, skeleton_x, skeleton_y, 150, 250)
 
@@ -253,23 +308,8 @@ AddEvent("paint", function(ctx)
     		DrawLine(ctx, skeleton_x + 75, skeleton_y + 175, skeleton_x + 110, skeleton_y + 240, 200, 255, 255, 255)
     	end
     end
-    if contains(activation_type, "Container") then
-    	local r, g, b, a = GetUi(ui.color)
-       
-        draw_container(ctx, box_x, box_y, 410, 30 + height_add + 2)
-        DrawText(ctx, box_x + 180, box_y + 7, 103, 170, 6, 255, "b", 999, "Damage log")
-        for i = 1, #logs do
-           	DrawText(ctx, box_x + 10, box_y + 10 + (10 * i), r, g, b, a, "", 400, logs[i])
-           	if i > 6 then
-           		table.remove( logs, 1)
-       	 	end
-       	 	height_add = (i * 10)
-    		local now = realtime()
-    		if lasttime < now - 1 then
-    		    table.remove(logs, 1) 
-    		    lasttime = now
-    		end
-        end       	
+    if contains(GetUi(ui.multiselect), "Thirdperson hitbox") and is_thirdperson(ctx) and player_hurt.hitgroup ~= -1 then
+    	local r, g, b = GetUi(ui.color)
+    	client.draw_hitboxes(player_hurt.userid, .025, player_hurt.hitgroup, r, g, b)
     end
-    
 end)
