@@ -64,6 +64,7 @@ local lby_timer_ref = NewRef(vsls, plesp, "lby timer")
 local activation_type_ref = NewRef(vsls, plesp, "activation type")
 
 local esp_builder_checkbox = NewCheckbox(vsls, plesp, "ESP Builder")
+local dead_only = NewCheckbox(vsls, plesp, "Dead only")
 local teammates_checkbox = NewCheckbox(vsls, plesp, "Teammates")
 local teammates_color = NewColor(vsls, plesp, "Teammates")
 
@@ -2115,6 +2116,9 @@ AddEvent("paint", function(ctx)
             local enabled = GetUi(esp_builder_checkbox)
             
             if enabled and activation_type_ref then
+                    
+                local health = GetProp(GetLocalPlayer(), "m_iHealth")
+                if health > 0 and GetUi(dead_only) then return end
                 
                 if GetUi(box_mode_combo) == "2D" then
                     DrawBoxEsp(ctx, player)
