@@ -1,10 +1,24 @@
+local attack_key = "mouse1"
+local attack_bind = "+attack"
+-------------------------
+
+local vector3d, err = pcall(require, "libs/Vector3D")
+if err and vector3d == false then
+    vector3d, err = pcall(require, "Vector3D")
+    if err and vector3d == false then
+        client.log("Please download https://gamesense.pub/forums/viewtopic.php?id=5464")
+        client.log("or https://github.com/Aviarita/lua-scripts/blob/master/libs/Vector3D.lua to use this script")
+        client.log(err)
+        return
+    end
+end
+
+
 local GetUi = ui.get
 local NewCheckbox = ui.new_checkbox
 local NewRef = ui.reference
 local SetVisible = ui.set_visible
 local SetCallback = ui.set_callback
-
-local sqrt, sin, cos   = math.sqrt, math.sin, math.cos
 
 local Log = client.log
 local AddEvent = client.set_event_callback
@@ -18,40 +32,21 @@ local ui = {
 	ragebot = NewRef("rage", "aimbot", "enabled"),
 }
 
--- credits to eso --
-local pi = 3.14159265358979323846
-local deg2rad = pi / 180.0
-local rad2deg = 180.0 / pi
+-- credits to sapphyrus
+local function get_crosshair_entity(skip_entindex, max_distance)
+    local skip_entindex = skip_entindex ~= nil and skip_entindex or GetLocalPlayer()
+    local max_distance = max_distance ~= nil and max_distance or 8192
 
-local function vec3_normalize(x, y, z)
-	local len = sqrt(x * x + y * y + z * z)
-	if len == 0 then
-		return 0, 0, 0
-	end
-	local r = 1 / len
-	return x*r, y*r, z*r
-end
+    local pitch, yaw = client.camera_angles()
 
-local function vec3_dot(ax, ay, az, bx, by, bz)
-	return ax*bx + ay*by + az*bz
-end
+    local fwd = angle_forward(Vector3(pitch, yaw, 0))
+    local start_pos = Vector3(client.eye_position())
+    local end_pos = start_pos + (fwd * max_distance)
 
-local function angle_to_vec(pitch, yaw)
-	local p, y = deg2rad*pitch, deg2rad*yaw
-	local sp, cp, sy, cy = sin(p), cos(p), sin(y), cos(y)
-	return cp*cy, cp*sy, -sp
-end
+    local x1, y1, z1 = start_pos:unpack()
 
-local function aiming_at_me(ent, lx, ly, lz)
-	local pitch, yaw, roll = GetProp(ent, "m_angEyeAngles")
-	if pitch == nil then return end
-
-	local ex, ey, ez = angle_to_vec(pitch, yaw)
-	local px, py, pz = GetProp(ent, "m_vecOrigin")
-	if px == nil then return end
-
-	local dx, dy, dz = vec3_normalize(lx-px, ly-py, lz-pz)
-	return vec3_dot(dx, dy, dz, ex, ey, ez) > 0.98480775301
+    local fraction, entindex_hit = client.trace_line(skip_entindex, x1, y1, z1, end_pos:unpack())
+    return entindex_hit, fraction
 end
 
 -- credits end --
@@ -61,35 +56,63 @@ SetCallback(ui.enabled, function()
 	SetVisible(ui.ignore_while_spraying, GetUi(ui.enabled))
 end)
 
+local function is_grenade_or_bomb(weapon_id)
+    local weapon_item_index = GetProp(weapon_id, "m_iItemDefinitionIndex")
+    if weapon_item_index == 43 then -- flashbang
+        return true
+        
+    elseif weapon_item_index == 44 then -- he
+        return true
+        
+    elseif weapon_item_index == 45 then -- smoke
+        return true
+        
+    elseif weapon_item_index == 46 then -- molotov
+        return true
+        
+    elseif weapon_item_index == 47 then -- decoy
+        return true
+        
+    elseif weapon_item_index == 48 then -- incendiary
+        return true
+        
+    elseif weapon_item_index == 49 then -- bomb
+        return true
+    else
+        return false
+    end
+end
+
+
 AddEvent("run_command", function()
 
 	if not GetUi(ui.enabled) then 
-		client.exec("bind mouse1 +attack")
+		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
 		return 
 	end
+	if GetUi(ui.ragebot) then return end
 
-	local players = entity.get_players(false)
-	
-	for i=1, #players do
+	local shots_fired = GetProp(GetLocalPlayer(), "m_iShotsFired")
 
-		local player = players[i]
+	if shots_fired > 2 and GetUi(ui.ignore_while_spraying) then return end
 
-		if GetProp(player, "m_iTeamNum") ~= GetProp(GetLocalPlayer(), "m_iTeamNum") then return end
+	local is_grenade = is_grenade_or_bomb(entity.get_player_weapon(GetLocalPlayer()))
 
-		if GetUi(ui.ragebot) then return end
-		
-		local shots_fired = GetProp(GetLocalPlayer(), "m_iShotsFired")
-	
-		if shots_fired > 2 and GetUi(ui.ignore_while_spraying) then return end
+	if is_grenade then
+		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
+	 	return 
+	end
 
-		local originx, originy, originz = GetProp(player, "m_vecOrigin")
-		if originx == nil then return end
+	local player = get_crosshair_entity()
+	if not player then return end
 
-		if aiming_at_me(GetLocalPlayer(), originx, originy, originz) then
-			client.exec("unbind mouse1; -attack")
-		else
-			client.exec("bind mouse1 +attack")
-		end
+	local originx, originy, originz = GetProp(player, "m_vecOrigin")
+	if originx == nil then return end
+
+	if GetProp(player, "m_iTeamNum") == GetProp(GetLocalPlayer(), "m_iTeamNum") then
+		client.exec("unbind " .. attack_key .. "; -attack")
+	else
+		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
 	end
 
 end)
