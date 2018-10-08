@@ -7,10 +7,21 @@ end
 
 client.set_event_callback("paint", function(ctx)
     if not ui.get(cb) then return end
-    local c4 = entity.get_all("CPlantedC4")[1]
-    if c4 ~= nil and entity.get_prop(c4, "m_bBombDefused") == 0 and get_bomb_time(c4) > 0 then
+
+    local c4 = entity.get_all("CC4")[1]
+    if c4 ~= nil then
         local r,g,b,a = ui.get(color)
         local epx, epy, epz = entity.get_prop(c4, "m_vecOrigin")
+        local wx, wy = client.world_to_screen(ctx, epx, epy, epz)
+        if wx ~= nil then
+            client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, "BOMB")
+        end
+    end
+
+    local c4_planted = entity.get_all("CPlantedC4")[1]
+    if c4_planted ~= nil and entity.get_prop(c4_planted, "m_bBombDefused") == 0 and get_bomb_time(c4_planted) > 0 then
+        local r,g,b,a = ui.get(color)
+        local epx, epy, epz = entity.get_prop(c4_planted, "m_vecOrigin")
         epz = epz + 6
         local wx, wy = client.world_to_screen(ctx, epx, epy, epz)
         if wx ~= nil then
