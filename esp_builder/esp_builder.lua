@@ -182,10 +182,10 @@ function table.empty (self)
 end
 
 local function GetDistanceInMeter(a_x, a_y, a_z, b_x, b_y, b_z)
-    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254) .. "m"
+    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254) .. "M"
 end
 local function GetDistanceInFeet(a_x, a_y, a_z, b_x, b_y, b_z)
-    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254 / 0.3048) .. "ft"
+    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254 / 0.3048) .. "FT"
 end
 local function GetDistanceInUnits(a_x, a_y, a_z, b_x, b_y, b_z)
     return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2))) .. " units"
