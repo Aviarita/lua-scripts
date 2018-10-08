@@ -9,10 +9,10 @@ client.set_event_callback("paint", function(ctx)
     if not ui.get(cb) then return end
 
     local c4 = entity.get_all("CC4")[1]
-    local player_resource = entity.get_all("CCSPlayerResource")[1]
-    if c4 ~= nil and (entity.get_prop(player_resource, "m_iPlayerC4") == 0) then
+    if c4 ~= nil then
         local r,g,b,a = ui.get(color)
         local epx, epy, epz = entity.get_prop(c4, "m_vecOrigin")
+        if epx == 0 and epy == 0 and epz == 0 then return end
         local wx, wy = client.world_to_screen(ctx, epx, epy, epz)
         if wx ~= nil then
             client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, "BOMB")
