@@ -37,9 +37,7 @@ client.set_event_callback("paint", function(ctx)
         epz = epz + 4
         local wx, wy = client.world_to_screen(ctx, epx, epy, epz)
         if wx ~= nil then
-            if ui.get(dropped_weapons) == "Off" then
-                client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, "BOMB")
-            end
+            client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, "BOMB")
             wy = wy - 10
             client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, GetDistanceInFeet(lpx, lpy, lpz, epx, epy, epz))
         end
