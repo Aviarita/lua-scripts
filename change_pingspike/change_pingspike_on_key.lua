@@ -22,10 +22,6 @@ SetVisible(new_pingspike_key, false)
 SetVisible(new_pingspike_value, false)
 
 AddEvent("run_command", function()
-        
-    SetVisible(new_pingspike_key, GetUi(pingspike_cb))
-    SetVisible(new_pingspike_value, GetUi(pingspike_cb))  
-        
     if GetUi(new_pingspike_key) then
         SetUi(pingspike_slider, GetUi(new_pingspike_value))
         should_change = 1
@@ -35,6 +31,9 @@ AddEvent("run_command", function()
     elseif GetUi(new_pingspike_key) ~= true then
         old_value = GetUi(pingspike_slider)
     end
+    
+    SetVisible(new_pingspike_key, GetUi(pingspike_cb))
+    SetVisible(new_pingspike_value, GetUi(pingspike_cb))
 end)
 
 -- credits to chay --
@@ -49,9 +48,9 @@ local function rgb_percents(percentage)
 end
 
 AddEvent("paint", function(ctx)
-        
+
     if GetLocalPlayer() == nil then return end
-       
+    
     if diff_old == nil then
         diff_old = 0
     end
@@ -70,6 +69,8 @@ AddEvent("paint", function(ctx)
         if diff_old > diff then i = -1 else i = 1 end
         diff_old = diff_old + i
     end
+
+    local r, g, b = rgb_percents(diff_old / 100)
     
     if diff < 75 and diff > 0 then
         r, g, b = rgb_percents(diff_old / 100)
