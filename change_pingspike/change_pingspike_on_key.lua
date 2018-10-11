@@ -18,8 +18,8 @@ local old_value = GetUi(pingspike_slider)
 
 local should_change = 0
 
-SetVisible(new_pingspike_key, false)
-SetVisible(new_pingspike_value, false)
+SetVisible(new_pingspike_key, GetUi(pingspike_cb))
+SetVisible(new_pingspike_value, GetUi(pingspike_cb))
 
 AddEvent("run_command", function()
     if GetUi(new_pingspike_key) then
