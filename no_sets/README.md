@@ -1,1 +1,1 @@
-[menu](https://i.imgur.com/eulBfQ8.gif)
+https://i.imgur.com/eulBfQ8.gif
