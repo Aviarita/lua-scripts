@@ -9,6 +9,8 @@ if err and vector3d == false then
     end
 end
 
+local bit = require( "bit" )
+local band = bit.band
 
 local GetUi = ui.get
 local SetUi = ui.set
@@ -30,7 +32,7 @@ local GetPlayerName = entity.get_player_name
 local GetWeapon = entity.get_player_weapon
 local GetClass = entity.get_classname
 
-local Log = client.log
+local log = client.log
 
 local AddEvent = client.set_event_callback
 
@@ -66,7 +68,6 @@ local activation_type_ref = NewRef(vsls, plesp, "activation type")
 local esp_builder_checkbox = NewCheckbox(vsls, plesp, "ESP Builder")
 local dead_only = NewCheckbox(vsls, plesp, "Dead only")
 local teammates_checkbox = NewCheckbox(vsls, plesp, "Teammates")
-local teammates_color = NewColor(vsls, plesp, "Teammates")
 
 local box_esp_modes = {
     "None",
@@ -182,10 +183,10 @@ function table.empty (self)
 end
 
 local function GetDistanceInMeter(a_x, a_y, a_z, b_x, b_y, b_z)
-    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254) .. "M"
+    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254) .. "m"
 end
 local function GetDistanceInFeet(a_x, a_y, a_z, b_x, b_y, b_z)
-    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254 / 0.3048) .. "FT"
+    return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2)) * 0.0254 / 0.3048) .. "ft"
 end
 local function GetDistanceInUnits(a_x, a_y, a_z, b_x, b_y, b_z)
     return math.ceil(math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2))) .. " units"
@@ -204,271 +205,79 @@ local function clamp(min, max, current)
     return math.floor(current)
 end
 
-local function is_misc_weapon(entindex)
-    local weapon_id = GetProp(entity_index, "m_hActiveWeapon")
-    local weapon_item_index = GetProp(weapon_id, "m_iItemDefinitionIndex")
-    
-    if weapon_item_index == 42 then -- knife(ct)
-        return true
-        
-    elseif weapon_item_index == 43 then -- flashbang
-        return true
-        
-    elseif weapon_item_index == 44 then -- he
-        return true
-        
-    elseif weapon_item_index == 45 then -- smoke
-        return true
-        
-    elseif weapon_item_index == 46 then -- molotov
-        return true
-        
-    elseif weapon_item_index == 47 then -- decoy
-        return true
-        
-    elseif weapon_item_index == 48 then -- incendiary
-        return true
-        
-    elseif weapon_item_index == 49 then -- bomb
-        return true
-        
-    elseif weapon_item_index == 500 then -- bayonet
-        return true
-        
-    elseif weapon_item_index == 505 then -- flip
-        return true
-        
-    elseif weapon_item_index == 506 then -- gut
-        return true
-        
-    elseif weapon_item_index == 507 then -- karambit
-        return true
-        
-    elseif weapon_item_index == 508 then -- m9 bayonet
-        return true
-        
-    elseif weapon_item_index == 509 then -- huntsman
-        return true
-        
-    elseif weapon_item_index == 512 then -- falchion
-        return true
-        
-    elseif weapon_item_index == 514 then -- bowie
-        return true
-        
-    elseif weapon_item_index == 515 then -- butterfly
-        return true
-        
-    elseif weapon_item_index == 516 then -- shadow daggers
-        return true
-        
-    elseif weapon_item_index == 519 then -- ursus
-        return true
-        
-    elseif weapon_item_index == 520 then -- navaja
-        return true
-        
-    elseif weapon_item_index == 521 then -- UNKNOWN
-        return true
-        
-    elseif weapon_item_index == 522 then -- siletto
-        return true
-        
-    elseif weapon_item_index == 523 then -- talon
-        return true
-        
-    else
-        return false
-    end
-    
-    -- return false
-end
-
-local function get_max_ammo(entity_index)
-    local max_ammo = nil
-    local weapon_id = GetProp(entity_index, "m_hActiveWeapon")
-    local weapon_item_index = GetProp(weapon_id, "m_iItemDefinitionIndex")
-    
-    if weapon_item_index == 1 or weapon_item_index == 589825 then -- deagle
-        
-        max_ammo = 7
-        
-    elseif weapon_item_index == 2 then -- dual barettas
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 3 then -- 5-7
-        
-        max_ammo = 20
-        
-    elseif weapon_item_index == 4 then -- glock
-        
-        max_ammo = 20
-        
-    elseif weapon_item_index == 7 then -- ak
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 8 then -- aug
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 9 then -- awp
-        
-        max_ammo = 10
-        
-    elseif weapon_item_index == 10 then -- famas
-        
-        max_ammo = 25
-        
-    elseif weapon_item_index == 11 then -- g3sg1
-        
-        max_ammo = 20
-        
-    elseif weapon_item_index == 13 then -- galil
-        
-        max_ammo = 35
-        
-    elseif weapon_item_index == 14 then -- m249
-        
-        max_ammo = 100
-        
-    elseif weapon_item_index == 16 then -- m4a4
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 17 then -- mac 10
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 19 then -- p90
-        
-        max_ammo = 50
-        
-    elseif weapon_item_index == 24 then -- ump
-        
-        max_ammo = 25
-        
-    elseif weapon_item_index == 25 then -- xm1014
-        
-        max_ammo = 7
-        
-    elseif weapon_item_index == 26 then -- bizon
-        
-        max_ammo = 64
-        
-    elseif weapon_item_index == 27 then -- mag7
-        
-        max_ammo = 5
-        
-    elseif weapon_item_index == 28 then -- negev
-        
-        max_ammo = 150
-        
-    elseif weapon_item_index == 29 then -- sawed off
-        
-        max_ammo = 7
-        
-    elseif weapon_item_index == 30 then -- tec 9
-        
-        max_ammo = 18
-        
-    elseif weapon_item_index == 32 then -- p2000
-        
-        max_ammo = 13
-        
-    elseif weapon_item_index == 33 then -- mp7
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 34 then -- mp9
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 35 then -- nova
-        
-        max_ammo = 8
-        
-    elseif weapon_item_index == 36 then -- p250
-        
-        max_ammo = 13
-        
-    elseif weapon_item_index == 38 then -- scar 20
-        
-        max_ammo = 20
-        
-    elseif weapon_item_index == 39 then -- sg553
-        
-        max_ammo = 30
-        
-    elseif weapon_item_index == 40 then -- scout
-        
-        max_ammo = 10
-        
-    elseif weapon_item_index == 60 then -- m4a1s
-        
-        max_ammo = 20
-        
-    elseif weapon_item_index == 61 then -- usps
-        
-        max_ammo = 12
-        
-    elseif weapon_item_index == 63 then -- cz
-        
-        max_ammo = 12
-        
-    elseif weapon_item_index == 64 then -- revolvo
-        
-        max_ammo = 8
-    else
-        max_ammo = nil
-    end
-    return max_ammo
-end
-
-local weaponids = {
-    CDEagle = "Desert Eagle/R8",
-    CWeaponElite = "Dual Berettas",
-    CWeaponFiveSeven = "Five-SeveN",
-    CWeaponGlock = "Glock-18",
-    CAK47 = "AK-47",
-    CWeaponAug = "AUG",
-    CWeaponAWP = "AWP",
-    CWeaponFamas = "FAMAS",
-    CWeaponG3SG1 = "G3SG1",
-    CWeaponGalilAR = "Galil AR",
-    CWeaponM249 = "M249",
-    CWeaponM4A1 = "M4",
-    CWeaponMAC10 = "MAC-10",
-    CWeaponP90 = "P90",
-    CWeaponUMP45 = "UMP-45",
-    CWeaponXM1014 = "XM1014",
-    CWeaponBizon = "PP-Bizon",
-    CWeaponMag7 = "MAG-7",
-    CWeaponNegev = "Negev",
-    CWeaponSawedoff = "Sawed-Off",
-    CWeaponTec9 = "Tec-9",
-    CWeaponHKP2000 = "P2000/USP-S",
-    CWeaponMP7 = "MP7/MP5",
-    CWeaponMP9 = "MP9",
-    CWeaponNOVA = "Nova",
-    CWeaponP250 = "P250/CZ75",
-    CWeaponSCAR20 = "SCAR-20",
-    CWeaponSG553 = "SG 553",
-    CWeaponSG556 = "SG 556",
-    CWeaponSSG08 = "SSG 08",
-    CWeaponTaser = "Taser",
-    CKnife = "Knife",
-    CHEGrenade = "HE",
-    CSmokeGrenade = "Smoke",
-    CDecoyGrenade = "Decoy",
-    CFlashbang = "Flash",
-    CIncendiaryGrenade = "Incendiary",
-    CMolotovGrenade = "Molotov",
+local misc_weapons = {
+    [41] =  true, -- Knife
+    [42] =  true, -- Knife
+    [43] =  true, -- Flashbang
+    [44] =  true, -- Grenade
+    [45] =  true, -- Smoke
+    [46] =  true, -- Molotov
+    [47] =  true, -- Decoy
+    [48] =  true, -- Incendiary
+    [59] =  true, -- Knife
+    [500] = true, -- Bayonet
+    [505] = true, -- Flip Knife
+    [506] = true, -- Gut Knife
+    [507] = true, -- Karambit
+    [508] = true, -- M9 Bayonet
+    [509] = true, -- Huntsman Knife
+    [512] = true, -- Falchion Knife
+    [514] = true, -- Bowie Knife
+    [515] = true, -- Butterfly Knife
+    [516] = true, -- Shadow Daggers
+    [519] = true, -- Ursus Knife
+    [520] = true, -- Navaja Knife
+    [522] = true, -- Siletto Knife
+    [523] = true, -- Talon Knife
 }
 
-local function get_weapon_name(weapon)
-    return weaponids[entity.get_classname(weapon)]
+local function is_misc_weapon(entindex)
+    local weapon_id = GetProp(entindex, "m_hActiveWeapon")
+    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+    return misc_weapons[weapon_item_index]
+end
+
+local ammo = {
+    [1] = 7, -- Deagle
+    [2] = 30, -- Duals
+    [3] = 20, -- five seven
+    [4] = 20, -- glock
+    [7] = 30, -- ak
+    [8] = 30, -- aug
+    [9] = 10,  -- awp
+    [10] = 25, -- famas
+    [11] = 20, -- t auto
+    [13] = 35, -- galil
+    [14] = 100, -- ms249
+    [16] = 30, -- m4a4
+    [17] = 30,-- mac 10
+    [19] = 50,-- p90
+    [23] = 30, -- mp5-sd
+    [24] = 25,-- ump
+    [25] = 7,-- xm1014
+    [26] = 64,-- bizon
+    [27] = 5,-- mag7
+    [28] = 150, -- negev
+    [29] = 7, -- sawed off
+    [30] = 18, -- tec9
+    [32] = 13, -- p2k
+    [33] = 30, -- mp7
+    [34] = 30, -- mp9
+    [35] = 8, -- nova
+    [36] = 13, -- p250
+    [38] = 20, -- ct auto
+    [39] = 30, -- sg553
+    [40] = 10, -- scout
+    [60] = 20, -- m4a1s
+    [61] = 12, -- usps
+    [63] = 12, -- cz75
+    [64] = 8, -- revolvo
+}
+
+local function get_max_ammo(entity_index)
+    local weapon_id = GetProp(entity_index, "m_hActiveWeapon")
+    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+    return ammo[weapon_item_index] or 0
 end
 
 --credits to sapphyrus --
@@ -550,9 +359,9 @@ local function get_dormant_players(enemy_only, alive_only)
                 is_enemy = false
             end
             
-            if player == GetLocalPlayer() then
-                is_enemy = false
-            end
+           if player == GetLocalPlayer() then
+               is_enemy = false
+           end
             
             if is_enemy then
                 local is_alive = true
@@ -572,185 +381,71 @@ end
 -- credits end --
 
 -- credits to nmchris
+
+local weapons = {
+    [1] = "Desert Eagle",
+    [2] = "Dual Berettas",
+    [3] = "Five-SeveN",
+    [4] = "Glock-18",
+    [7] = "AK-47",
+    [8] = "AUG",
+    [9] = "AWP",
+    [10] = "FAMAS",
+    [11] = "G3SG1",
+    [13] = "Galil AR",
+    [14] = "M249",
+    [16] = "M4A4",
+    [17] = "MAC-10",
+    [19] = "P90",
+    [23] = "MP5-SD",
+    [24] = "UMP-45",
+    [25] = "XM1014",
+    [26] = "PP-Bizon",
+    [27] = "MAG-7",
+    [28] = "Negev",
+    [29] = "Sawed-Off",
+    [30] = "Tec-9",
+    [32] = "P2000",
+    [33] = "MP7",
+    [34] = "MP9",
+    [35] = "Nova",
+    [36] = "P250",
+    [38] = "SCAR-20",
+    [39] = "SG 553",
+    [40] = "SSG 08",
+    [41] = "Knife",
+    [42] = "Knife",
+    [43] = "Flashbang",
+    [44] = "Grenade",
+    [45] = "Smoke",
+    [46] = "Molotov",
+    [47] = "Decoy",
+    [48] = "Incendiary",
+    [59] = "Knife",
+    [60] = "M4A1-S",
+    [61] = "USP-S",
+    [63] = "CZ75-Auto",
+    [64] = "R8 Revolver",
+    [500] = "Bayonet",
+    [505] = "Flip Knife",
+    [506] = "Gut Knife",
+    [507] = "Karambit",
+    [508] = "M9 Bayonet",
+    [509] = "Huntsman Knife",
+    [512] = "Falchion Knife",
+    [514] = "Bowie Knife",
+    [515] = "Butterfly Knife",
+    [516] = "Shadow Daggers",
+    [519] = "Ursus Knife",
+    [520] = "Navaja Knife",
+    [522] = "Siletto Knife",
+    [523] = "Talon Knife",
+}
+
 local function get_weapon(entindex)
-    
-    local current_weapon = nil
     local weapon_id = GetProp(entindex, "m_hActiveWeapon")
-    local weapon_item_index = GetProp(weapon_id, "m_iItemDefinitionIndex")
-    
-    if weapon_item_index == 1 then
-        current_weapon = "Desert Eagle"
-        
-    elseif weapon_item_index == 2 then
-        current_weapon = "Dual Berettas"
-        
-    elseif weapon_item_index == 3 then
-        current_weapon = "Five-SeveN"
-        
-    elseif weapon_item_index == 4 then
-        current_weapon = "Glock-18"
-        
-    elseif weapon_item_index == 7 then
-        current_weapon = "AK-47"
-        
-    elseif weapon_item_index == 8 then
-        current_weapon = "AUG"
-        
-    elseif weapon_item_index == 9 then
-        current_weapon = "AWP"
-        
-    elseif weapon_item_index == 10 then
-        current_weapon = "FAMAS"
-        
-    elseif weapon_item_index == 11 then
-        current_weapon = "G3SG1"
-        
-    elseif weapon_item_index == 13 then
-        current_weapon = "Galil AR"
-        
-    elseif weapon_item_index == 14 then
-        current_weapon = "M249"
-        
-    elseif weapon_item_index == 16 then
-        current_weapon = "M4A4"
-        
-    elseif weapon_item_index == 17 then
-        current_weapon = "MAC-10"
-        
-    elseif weapon_item_index == 19 then
-        current_weapon = "P90"
-        
-    elseif weapon_item_index == 24 then
-        current_weapon = "UMP-45"
-        
-    elseif weapon_item_index == 25 then
-        current_weapon = "XM1014"
-        
-    elseif weapon_item_index == 26 then
-        current_weapon = "PP-Bizon"
-        
-    elseif weapon_item_index == 27 then
-        current_weapon = "MAG-7"
-        
-    elseif weapon_item_index == 28 then
-        current_weapon = "Negev"
-        
-    elseif weapon_item_index == 29 then
-        current_weapon = "Sawed-Off"
-        
-    elseif weapon_item_index == 30 then
-        current_weapon = "Tec-9"
-        
-    elseif weapon_item_index == 32 then
-        current_weapon = "P2000"
-        
-    elseif weapon_item_index == 33 then
-        current_weapon = "MP7"
-        
-    elseif weapon_item_index == 34 then
-        current_weapon = "MP9"
-        
-    elseif weapon_item_index == 35 then
-        current_weapon = "Nova"
-        
-    elseif weapon_item_index == 36 then
-        current_weapon = "P250"
-        
-    elseif weapon_item_index == 38 then
-        current_weapon = "SCAR-20"
-        
-    elseif weapon_item_index == 39 then
-        current_weapon = "SG 553"
-        
-    elseif weapon_item_index == 40 then
-        current_weapon = "SSG 08"
-        
-    elseif weapon_item_index == 60 then
-        current_weapon = "M4A1-S"
-        
-    elseif weapon_item_index == 61 then
-        current_weapon = "USP-S"
-        
-    elseif weapon_item_index == 63 then
-        current_weapon = "CZ75-Auto"
-        
-    elseif weapon_item_index == 64 then
-        current_weapon = "R8 Revolver"
-        
-    elseif weapon_item_index == 42 then -- knife(ct)
-        current_weapon = "Knife"
-        
-    elseif weapon_item_index == 43 then -- flashbang
-        current_weapon = "Flash"
-        
-    elseif weapon_item_index == 44 then -- he
-        current_weapon = "HE"
-        
-    elseif weapon_item_index == 45 then -- smoke
-        current_weapon = "Smoke"
-        
-    elseif weapon_item_index == 46 then -- molotov
-        current_weapon = "Molotov"
-        
-    elseif weapon_item_index == 47 then -- decoy
-        current_weapon = "Decoy"
-        
-    elseif weapon_item_index == 48 then -- incendiary
-        current_weapon = "Incendiary"
-        
-    elseif weapon_item_index == 49 then -- bomb
-        current_weapon = "Bomb"
-        
-    elseif weapon_item_index == 500 then -- bayonet
-        current_weapon = "Bayonet"
-        
-    elseif weapon_item_index == 505 then -- flip
-        current_weapon = "Flip"
-        
-    elseif weapon_item_index == 506 then -- gut
-        current_weapon = "Gut"
-        
-    elseif weapon_item_index == 507 then -- karambit
-        current_weapon = "Karambit"
-        
-    elseif weapon_item_index == 508 then -- m9 bayonet
-        current_weapon = "M9 Bayonet"
-        
-    elseif weapon_item_index == 509 then -- huntsman
-        current_weapon = "Huntsman"
-        
-    elseif weapon_item_index == 512 then -- falchion
-        current_weapon = "Falchion"
-        
-    elseif weapon_item_index == 514 then -- bowie
-        current_weapon = "Bowie"
-        
-    elseif weapon_item_index == 515 then -- butterfly
-        current_weapon = "Butterfly"
-        
-    elseif weapon_item_index == 516 then -- shadow daggers
-        current_weapon = "Shadow Daggers"
-        
-    elseif weapon_item_index == 519 then -- ursus
-        current_weapon = "Ursus"
-        
-    elseif weapon_item_index == 520 then -- navaja
-        current_weapon = "Navaja"
-        
-    elseif weapon_item_index == 521 then -- UNKNOWN
-        current_weapon = "Other"
-        
-    elseif weapon_item_index == 522 then -- siletto
-        current_weapon = "Siletto"
-        
-    elseif weapon_item_index == 523 then -- talon
-        current_weapon = "Talon"
-        
-    else
-        current_weapon = "Other"
-    end
-    
-    return current_weapon
+    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+    return weapons[weapon_item_index]
 end
 -- credits end
 
@@ -760,28 +455,21 @@ local gbb = {
     middle_x, middle_y
 }
 
-local overall_height_addition_right = 0
+local overall_height_addition_top_right = 0
 local overall_height_addition_bottom = 0
 
 AddEvent("paint", function()
-    
     if GetUi(flags_ref) == true then
-        overall_height_addition_right = 40
+        overall_height_addition_top_right = 40
     else
-        overall_height_addition_right = 0
+        overall_height_addition_top_right = 0
     end
-    
-    local height_addition_table = {
-        ["000"] = 0,
-        ["100"] = 5,
-        ["010"] = 5,
-        ["001"] = 15,
-        ["110"] = 10,
-        ["101"] = 18,
-        ["011"] = 18,
-        ["111"] = 25
-    }
-    overall_height_addition_bottom = height_addition_table[(GetUi(ammo_ref) and 1 or 0) .. (GetUi(lby_timer_ref) and 1 or 0) .. (GetUi(weapon_icon_ref) and 1 or 0)] or 0
+
+    if GetUi(lby_timer_ref) then
+        overall_height_addition_bottom = 5
+    else 
+        overall_height_addition_bottom = 0
+    end
 end)
 
 local function DrawBoxEsp(ctx, entity_index)
@@ -971,7 +659,6 @@ local function DrawPentagonEsp(ctx, entity_index)
     local red, green, blue, alpha = GetUi(box_color)
     
     if not is_visible and GetUi(box_invis_cb) then
-        red, green, blue, alpha = GetUi(box_invis_color)
     else
         red, green, blue, alpha = GetUi(box_color)
     end
@@ -1255,9 +942,10 @@ local function DrawAmmo(ctx, entity_index)
     local alpha = 150 * gbb.alpha
     local alpha2 = 255 * gbb.alpha
     local alpha3 = alpha3 * gbb.alpha
-    
-    local ammo_width = (gbb.width * ammo) / max_ammo
-    local ammo_height = (gbb.height * ammo) / max_ammo
+
+    local ammo_percentage = math.min(1, max_ammo == 0 and 1 or ammo/max_ammo)
+    local ammo_width = gbb.width * ammo_percentage
+    local ammo_height = gbb.height * ammo_percentage
     
     local healthbar_visible_check_table = {
         ["01"] = true,
@@ -1496,6 +1184,8 @@ local function DrawName(ctx, entity_index)
             ((healthbar_visible_check and contains(healthbar_activation_type, "Top")) and 1 or 0)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Top")) and 1 or 0)] or 0
         
+        if is_misc_weapon(entity_index) then height_addition = height_addition - 5 end
+
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.topY - 6 - height_addition, red, green, blue, alpha, name_flags, 25, fixed_name)
     end
     
@@ -1512,8 +1202,8 @@ local function DrawName(ctx, entity_index)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Right")) and 1 or 0)] or 0
         
         if GetUi(name_font_combo) == "Bold" then width_addition = width_addition + 1 end
-        
-        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY - 4 + overall_height_addition_right, red, green, blue, alpha, name_flags_right, 25, fixed_name)
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 5 end
+        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY - 4 + overall_height_addition_top_right, red, green, blue, alpha, name_flags_right, 25, fixed_name)
     end
     
     if contains(activation_type, "Right(Bottom)") then
@@ -1529,7 +1219,7 @@ local function DrawName(ctx, entity_index)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Right")) and 1 or 0)] or 0
         
         if GetUi(name_font_combo) == "Bold" then width_addition = width_addition + 1 end
-        
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 5 end
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.botY - 10, red, green, blue, alpha, name_flags_right, 25, fixed_name)
     end
     
@@ -1545,7 +1235,7 @@ local function DrawName(ctx, entity_index)
         height_subtraction = height_subtraction_table[
             ((healthbar_visible_check and contains(healthbar_activation_type, "Bottom")) and 1 or 0)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Bottom")) and 1 or 0)] or 0
-        
+        if is_misc_weapon(entity_index) then height_subtraction = height_subtraction - 5 end
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.botY + 6 + height_subtraction + overall_height_addition_bottom, red, green, blue, alpha, name_flags, 25, fixed_name)
     end
     
@@ -1560,7 +1250,7 @@ local function DrawName(ctx, entity_index)
         width_subtraction = width_subtraction_table[
             ((healthbar_visible_check and contains(healthbar_activation_type, "Left")) and 1 or 0)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Left")) and 1 or 0)] or 0
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - width_subtraction, gbb.topY - 4, red, green, blue, alpha, name_flags_left, 12, fixed_name)
     end
     
@@ -1575,7 +1265,7 @@ local function DrawName(ctx, entity_index)
         width_subtraction = width_subtraction_table[
             ((healthbar_visible_check and contains(healthbar_activation_type, "Left")) and 1 or 0)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Left")) and 1 or 0)] or 0
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - 1 - width_subtraction, gbb.botY - 10, red, green, blue, alpha, name_flags_left, 12, fixed_name)
     end
 end
@@ -1609,9 +1299,9 @@ local function DrawWeapon(ctx, entity_index)
     if not is_visible and GetUi(weapon_esp_invis_cb) == false then
         return
     end
-    
+
     alpha = alpha * gbb.alpha
-    local enemy_weapon = get_weapon_name(entity.get_player_weapon(entity_index))
+    local enemy_weapon = get_weapon(entity_index)
     
     local weapon_flags = "cb"
     local weapon_flags_left = "rb"
@@ -1677,7 +1367,9 @@ local function DrawWeapon(ctx, entity_index)
             .. ((name_visible_check and contains(name_activation_type, "Top")) and 1 or 0)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Top")) and 1 or 0)] or 0
         
-        if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition - 2 end
+        if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition - 1 end
+        if is_misc_weapon(entity_index) then height_addition = height_addition - 5 
+        elseif GetUi(weapon_font_combo) == "Small" and is_misc_weapon(entity_index) then height_addition = height_addition - 4 end
         
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.topY - 6 - height_addition, red, green, blue, alpha, weapon_flags, 999, enemy_weapon)
     end
@@ -1706,8 +1398,8 @@ local function DrawWeapon(ctx, entity_index)
         
         if GetUi(weapon_font_combo) == "Bold" or GetUi(weapon_font_combo) == "Small" then width_addition = width_addition + 1 end
         if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition + 2 end
-        
-        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_right, red, green, blue, alpha, weapon_flags_right, 999, enemy_weapon)
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_top_right, red, green, blue, alpha, weapon_flags_right, 999, enemy_weapon)
     end
     
     if contains(activation_type, "Right(Bottom)") then
@@ -1734,7 +1426,7 @@ local function DrawWeapon(ctx, entity_index)
         
         if GetUi(weapon_font_combo) == "Bold" or GetUi(weapon_font_combo) == "Small" then width_addition = width_addition + 1 end
         if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition - 2 end
-        
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.botY - 10 - height_addition, red, green, blue, alpha, weapon_flags_right, 999, enemy_weapon)
     end
     
@@ -1757,7 +1449,7 @@ local function DrawWeapon(ctx, entity_index)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Bottom")) and 1 or 0)] or 0
         
         if GetUi(weapon_font_combo) == "Small" then height_subtraction = height_subtraction + 1 end
-        
+        if is_misc_weapon(entity_index) then height_subtraction = height_subtraction - 5 end
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.botY + 6 + height_subtraction + overall_height_addition_bottom, red, green, blue, alpha, weapon_flags, 999, enemy_weapon)
     end
     
@@ -1784,7 +1476,7 @@ local function DrawWeapon(ctx, entity_index)
         end
         
         if GetUi(weapon_font_combo) == "Small" then height_subtraction = height_subtraction + 2 width_subtraction = width_subtraction + 2 end
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.topY - 4 + height_subtraction, red, green, blue, alpha, weapon_flags_left, 999, enemy_weapon)
     end
     
@@ -1811,7 +1503,7 @@ local function DrawWeapon(ctx, entity_index)
         end
         
         if GetUi(weapon_font_combo) == "Small" then height_subtraction = height_subtraction - 2 width_subtraction = width_subtraction + 2 end
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.botY - 4 - height_subtraction, red, green, blue, alpha, weapon_flags_left, 999, enemy_weapon)
     end
 end
@@ -1947,7 +1639,8 @@ local function DrawDistance(ctx, entity_index)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Top")) and 1 or 0)] or 0
         
         if GetUi(distance_font_combo) == "Small" then height_addition = height_addition - 1 end
-        
+        if is_misc_weapon(entity_index) and (name_visible_check and contains(name_activation_type, "Top")) then height_addition = height_addition - 5 end
+
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.topY - 6 - height_addition, red, green, blue, alpha, distance_flags, 999, distance_value)
     end
     
@@ -1978,8 +1671,8 @@ local function DrawDistance(ctx, entity_index)
         
         if GetUi(distance_font_combo) == "Small" or GetUi(distance_font_combo) == "Bold" then width_addition = width_addition + 1 end
         if GetUi(distance_font_combo) == "Small" then height_addition = height_addition + 2 end
-        
-        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_right, red, green, blue, alpha, distance_flags_right, 999, distance_value)
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_top_right, red, green, blue, alpha, distance_flags_right, 999, distance_value)
     end
     
     if contains(activation_type, "Right(Bottom)") then
@@ -2009,7 +1702,7 @@ local function DrawDistance(ctx, entity_index)
         
         if GetUi(distance_font_combo) == "Small" or GetUi(distance_font_combo) == "Bold" then width_addition = width_addition + 1 end
         if GetUi(distance_font_combo) == "Small" then height_addition = height_addition - 2 end
-        
+        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.botY - 2 - height_addition, red, green, blue, alpha, distance_flags_right, 999, distance_value)
     end
     
@@ -2042,7 +1735,7 @@ local function DrawDistance(ctx, entity_index)
         .. ((ammo_bar_visible_check and contains(ammo_bar_activation_type, "Bottom")) and 1 or 0)] or 0
         
         if GetUi(distance_font_combo) == "Small" then height_subtraction = height_subtraction + 1 end
-        
+        if is_misc_weapon(entity_index) then height_subtraction = height_subtraction - 5 end
         DrawText(ctx, gbb.botX - gbb.width - gbb.middle_x, gbb.botY + 6 + height_subtraction + overall_height_addition_bottom, red, green, blue, alpha, distance_flags, 999, distance_value)
     end
     
@@ -2070,7 +1763,7 @@ local function DrawDistance(ctx, entity_index)
         .. ((contains(name_activation_type, "Left(Top)") and name_visible_check) and 1 or 0)]
         
         if GetUi(distance_font_combo) == "Small" then height_subtraction = height_subtraction + 2 width_subtraction = width_subtraction + 2 end
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.topY + height_subtraction, red, green, blue, alpha, distance_flags_left, 999, distance_value)
     end
     
@@ -2099,7 +1792,7 @@ local function DrawDistance(ctx, entity_index)
         .. ((contains(name_activation_type, "Left(Bottom)") and name_visible_check) and 1 or 0)]
         
         if GetUi(distance_font_combo) == "Small" then height_subtraction = height_subtraction - 2 width_subtraction = width_subtraction + 2 end
-        
+        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.botY - 2 - height_subtraction, red, green, blue, alpha, distance_flags_left, 999, distance_value)
     end
 end
@@ -2116,7 +1809,7 @@ AddEvent("paint", function(ctx)
             local enabled = GetUi(esp_builder_checkbox)
             
             if enabled and activation_type_ref then
-                    
+
                 local health = GetProp(GetLocalPlayer(), "m_iHealth")
                 if health > 0 and GetUi(dead_only) then return end
                 
@@ -2145,7 +1838,7 @@ end)
 local function set_invisible()
     SetVisible(box_mode_combo, false)
     SetVisible(teammates_checkbox, false)
-    SetVisible(teammates_color, false)
+    SetVisible(dead_only, false)
     SetVisible(box_color, false)
     SetVisible(box_invis_cb, false)
     SetVisible(box_invis_color, false)
@@ -2199,7 +1892,7 @@ AddEvent("paint", function()
     
     SetVisible(box_mode_combo, enabled)
     SetVisible(teammates_checkbox, enabled)
-    SetVisible(teammates_color, enabled)
+    SetVisible(dead_only, enabled)
     SetVisible(box_color, box_mode)
     SetVisible(box_invis_cb, box_mode)
     SetVisible(box_invis_color, box_mode)
@@ -2260,13 +1953,19 @@ AddEvent("paint", function()
     SetVisible(weapon_text, not enabled)
     SetVisible(distance, not enabled)
     SetVisible(teammate_ref, not enabled)
-    
+    SetVisible(ammo_ref, not enabled)
+    SetVisible(ammo_ref_color_ref, not enabled)
+    SetVisible(weapon_icon_ref, not enabled)
+    SetVisible(weapon_icon_color_ref, not enabled)
+
     if enabled then
         SetUi(bounding_box, false)
         SetUi(health_bar, false)
         SetUi(name, false)
         SetUi(weapon_text, false)
         SetUi(distance, false)
+        SetUi(ammo_ref, false)
+        SetUi(weapon_icon_ref, false)
     end
     
     if enabled then
