@@ -1407,7 +1407,7 @@ local function DrawWeapon(ctx, entity_index)
         
         if GetUi(weapon_font_combo) == "Bold" or GetUi(weapon_font_combo) == "Small" then width_addition = width_addition + 1 end
         if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition + 2 end
-        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Right") then width_addition = width_addition - 6 end       
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_top_right, red, green, blue, alpha, weapon_flags_right, 999, enemy_weapon)
     end
     
@@ -1435,7 +1435,7 @@ local function DrawWeapon(ctx, entity_index)
         
         if GetUi(weapon_font_combo) == "Bold" or GetUi(weapon_font_combo) == "Small" then width_addition = width_addition + 1 end
         if GetUi(weapon_font_combo) == "Small" then height_addition = height_addition - 2 end
-        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Right") then width_addition = width_addition - 6 end   
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.botY - 10 - height_addition, red, green, blue, alpha, weapon_flags_right, 999, enemy_weapon)
     end
     
@@ -1485,7 +1485,7 @@ local function DrawWeapon(ctx, entity_index)
         end
         
         if GetUi(weapon_font_combo) == "Small" then height_subtraction = height_subtraction + 2 width_subtraction = width_subtraction + 2 end
-        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Left") then width_subtraction = width_subtraction - 6 end 
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.topY - 4 + height_subtraction, red, green, blue, alpha, weapon_flags_left, 999, enemy_weapon)
     end
     
@@ -1512,7 +1512,7 @@ local function DrawWeapon(ctx, entity_index)
         end
         
         if GetUi(weapon_font_combo) == "Small" then height_subtraction = height_subtraction - 2 width_subtraction = width_subtraction + 2 end
-        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Left") then width_subtraction = width_subtraction - 6 end 
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.botY - 4 - height_subtraction, red, green, blue, alpha, weapon_flags_left, 999, enemy_weapon)
     end
 end
@@ -1680,7 +1680,7 @@ local function DrawDistance(ctx, entity_index)
         
         if GetUi(distance_font_combo) == "Small" or GetUi(distance_font_combo) == "Bold" then width_addition = width_addition + 1 end
         if GetUi(distance_font_combo) == "Small" then height_addition = height_addition + 2 end
-        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Right") then width_addition = width_addition - 6 end   
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.topY + 2 + height_addition + overall_height_addition_top_right, red, green, blue, alpha, distance_flags_right, 999, distance_value)
     end
     
@@ -1711,7 +1711,7 @@ local function DrawDistance(ctx, entity_index)
         
         if GetUi(distance_font_combo) == "Small" or GetUi(distance_font_combo) == "Bold" then width_addition = width_addition + 1 end
         if GetUi(distance_font_combo) == "Small" then height_addition = height_addition - 2 end
-        if is_misc_weapon(entity_index) then width_addition = width_addition - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Right") then width_addition = width_addition - 6 end   
         DrawText(ctx, gbb.botX + 2 + width_addition, gbb.botY - 2 - height_addition, red, green, blue, alpha, distance_flags_right, 999, distance_value)
     end
     
@@ -1772,7 +1772,7 @@ local function DrawDistance(ctx, entity_index)
         .. ((contains(name_activation_type, "Left(Top)") and name_visible_check) and 1 or 0)]
         
         if GetUi(distance_font_combo) == "Small" then height_subtraction = height_subtraction + 2 width_subtraction = width_subtraction + 2 end
-        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Left") then width_subtraction = width_subtraction - 6 end 
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.topY + height_subtraction, red, green, blue, alpha, distance_flags_left, 999, distance_value)
     end
     
@@ -1801,7 +1801,7 @@ local function DrawDistance(ctx, entity_index)
         .. ((contains(name_activation_type, "Left(Bottom)") and name_visible_check) and 1 or 0)]
         
         if GetUi(distance_font_combo) == "Small" then height_subtraction = height_subtraction - 2 width_subtraction = width_subtraction + 2 end
-        if is_misc_weapon(entity_index) then width_subtraction = width_subtraction - 6 end
+        if is_misc_weapon(entity_index) and contains(ammo_bar_activation_type, "Left") then width_subtraction = width_subtraction - 6 end 
         DrawText(ctx, gbb.topX - 2 - width_subtraction, gbb.botY - 2 - height_subtraction, red, green, blue, alpha, distance_flags_left, 999, distance_value)
     end
 end
