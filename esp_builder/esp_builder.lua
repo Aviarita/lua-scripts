@@ -232,9 +232,12 @@ local misc_weapons = {
 }
 
 local function is_misc_weapon(entindex)
-    local weapon_id = GetProp(entindex, "m_hActiveWeapon")
-    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
-    return misc_weapons[weapon_item_index]
+    local weapon_id = GetProp(entindex, "m_hActiveWeapon")   
+    if GetProp(weapon_id, "m_iItemDefinitionIndex") ~= nil then
+        local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+        return misc_weapons[weapon_item_index]
+    end
+    return 0
 end
 
 local ammo = {
@@ -276,8 +279,11 @@ local ammo = {
 
 local function get_max_ammo(entity_index)
     local weapon_id = GetProp(entity_index, "m_hActiveWeapon")
-    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
-    return ammo[weapon_item_index] or 0
+    if GetProp(weapon_id, "m_iItemDefinitionIndex") ~= nil then
+        local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+        return ammo[weapon_item_index] or 0
+    end
+    return 0
 end
 
 --credits to sapphyrus --
@@ -444,8 +450,11 @@ local weapons = {
 
 local function get_weapon(entindex)
     local weapon_id = GetProp(entindex, "m_hActiveWeapon")
-    local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
-    return weapons[weapon_item_index]
+    if GetProp(weapon_id, "m_iItemDefinitionIndex") ~= nil then
+       local weapon_item_index = band(GetProp(weapon_id, "m_iItemDefinitionIndex"), 0xFFFF)
+        return weapons[weapon_item_index]
+    end
+    return 0
 end
 -- credits end
 
