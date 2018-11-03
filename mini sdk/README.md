@@ -12,7 +12,7 @@ Things this "sdk" got:
 ![screen](https://third-rei.ch/ycfN3YS8O4.png)
 **Used code in the screenshot**
 ```lua
-require("class")
+require("classes")
 
 client.set_event_callback("paint", function(ctx)
     local players = entity.get_players(false)
