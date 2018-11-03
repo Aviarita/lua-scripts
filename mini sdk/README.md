@@ -1,6 +1,7 @@
 **Mini sdk for the gamesense lua api**
 
 This is a "mini sdk" i wrote for the gamesense lua api, it makes development of some scripts easier.
+
 Things this "sdk" got:
 1. Entity class
 2. Player class
