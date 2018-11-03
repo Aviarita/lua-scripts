@@ -9,6 +9,7 @@ Things this "sdk" got:
 6. Global playerresource class
 7. Gamerulesproxy class
 
+![screen](https://third-rei.ch/ycfN3YS8O4.png)
 **Used code in the screenshot**
 ```lua
 require("class")
@@ -63,5 +64,3 @@ client.set_event_callback("paint", function(ctx)
     renderer.indicator(255, 255, 255, 255, "is_bomb_planted: ", gamerules:is_bomb_planted())
 end)
 ```
-
-![screen](https://third-rei.ch/ycfN3YS8O4.png)
