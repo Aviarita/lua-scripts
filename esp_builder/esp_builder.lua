@@ -206,6 +206,7 @@ local function clamp(min, max, current)
 end
 
 local misc_weapons = {
+    [31] =  true, -- Taser
     [41] =  true, -- Knife
     [42] =  true, -- Knife
     [43] =  true, -- Flashbang
@@ -214,6 +215,7 @@ local misc_weapons = {
     [46] =  true, -- Molotov
     [47] =  true, -- Decoy
     [48] =  true, -- Incendiary
+    [49] =  true, -- C4
     [59] =  true, -- Knife
     [500] = true, -- Bayonet
     [505] = true, -- Flip Knife
@@ -230,6 +232,7 @@ local misc_weapons = {
     [522] = true, -- Siletto Knife
     [523] = true, -- Talon Knife
 }
+
 
 local function is_misc_weapon(entindex)
     local weapon_id = GetProp(entindex, "m_hActiveWeapon")   
@@ -411,6 +414,7 @@ local weapons = {
     [28] = "Negev",
     [29] = "Sawed-Off",
     [30] = "Tec-9",
+    [31] = "Taser",
     [32] = "P2000",
     [33] = "MP7",
     [34] = "MP9",
@@ -422,11 +426,12 @@ local weapons = {
     [41] = "Knife",
     [42] = "Knife",
     [43] = "Flashbang",
-    [44] = "Grenade",
+    [44] = "HE Grenade",
     [45] = "Smoke",
     [46] = "Molotov",
     [47] = "Decoy",
     [48] = "Incendiary",
+    [49] = "C4",
     [59] = "Knife",
     [60] = "M4A1-S",
     [61] = "USP-S",
