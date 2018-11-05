@@ -14,7 +14,7 @@ Things this "sdk" got:
 ![screen](https://third-rei.ch/ycfN3YS8O4.png)
 **Used code in the screenshot**
 ```lua
-require( "class" )
+require( "lua sdk" )
 
 local function draw_debug_infos(ctx, entity_index)
     local player = Player(entity_index) -- create a new player instance for entity_index
