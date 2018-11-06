@@ -19,6 +19,7 @@ require( "lua sdk" )
 local function draw_debug_infos(ctx, entity_index)
     local player = Player(entity_index) -- create a new player instance for entity_index
     local gbb = player:get_bounding_box(ctx)
+    if gbb.botX == nil then return end
 
     local local_player = LocalPlayer() -- create a new instance for the local player
     
@@ -26,7 +27,7 @@ local function draw_debug_infos(ctx, entity_index)
     for i = 1, #weapons do
         local weapons = weapons[i]
         local r, g, b = 255, 255, 255
-        -- checks if the weapon is the same as the active weapon of the player and changes the color
+        -- checks if any weapon is the same as the active weapon of the player and changes the color
         if weapons:get_index() == player:get_active_weapon():get_index() then 
             r, g, b = 215, 215, 0
         else
