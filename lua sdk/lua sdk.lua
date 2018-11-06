@@ -123,6 +123,12 @@ end
 function entity_mt:get_bounding_box(ctx)
 	local gbb = { topX, topY, botX, botY, alpha, width, height, middle_x, middle_y }
 	gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = entity.get_bounding_box(ctx, self.entindex)
+	if gbb.botX == nil then
+		for i = 1, #gbb do
+			gbb[i] = nil
+		end
+		return gbb
+	end
 	gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
 	gbb.middle_x = (gbb.topX - gbb.botX) / 2
 	gbb.middle_y = (gbb.topY - gbb.botY) / 2
@@ -1547,10 +1553,16 @@ end
 function player_mt:get_bounding_box(ctx)
 	local gbb = { topX, topY, botX, botY, alpha, width, height, middle_x, middle_y }
 	gbb.topX, gbb.topY, gbb.botX, gbb.botY, gbb.alpha = entity.get_bounding_box(ctx, self.entindex)
+	if gbb.botX == nil then
+		for i = 1, #gbb do
+			gbb[i] = nil
+		end
+		return gbb
+	end
 	gbb.width, gbb.height = gbb.botX - gbb.topX, gbb.botY - gbb.topY
-    gbb.middle_x = (gbb.topX - gbb.botX) / 2
-    gbb.middle_y = (gbb.topY - gbb.botY) / 2
-    return gbb
+	gbb.middle_x = (gbb.topX - gbb.botX) / 2
+	gbb.middle_y = (gbb.topY - gbb.botY) / 2
+	return gbb
 end
 
 --[[
