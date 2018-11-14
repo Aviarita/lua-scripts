@@ -33,7 +33,6 @@ client.set_event_callback("paint", function(ctx)
         local lpx, lpy, lpz = entity.get_prop(entity.get_local_player(), "m_vecOrigin")
         if epx == 0 and epy == 0 and epz == 0 then return end
         local wx, wy = client.world_to_screen(ctx, epx, epy, epz)
-        client.log(round_to_fifth(GetDistanceInFeet(lpx, lpy, lpz, epx, epy, epz)))
         if wx ~= nil then
             if ui.get(dropped_weapons) == "Off" then
                 client.draw_text(ctx, wx, wy, r, g, b, a, "c-", 0, "BOMB")
