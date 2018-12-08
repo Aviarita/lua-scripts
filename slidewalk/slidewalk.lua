@@ -57,6 +57,11 @@ local slidewalk = ui.new_checkbox("misc", "miscellaneous", "Slidewalk")
 client.set_event_callback('setup_command', function(ctx)
     local cmd = ffi_cast(ct_usercmd, ctx)
 
+    local move_type = entity.get_prop(entity.get_local_player(), "m_MoveType")
+
+    if move_type == 9 then return end -- disable when on ladder
+    if cmd.in_use == 1 then return end -- disable when holding e
+
     if ui.get(slidewalk) then
         if (cmd.forwardmove > 0) then
             cmd.in_back = 1
