@@ -1,7 +1,3 @@
-local attack_key = "mouse1"
-local attack_bind = "+attack"
--------------------------
-
 local vector3d, err = pcall(require, "libs/Vector3D")
 if err and vector3d == false then
     vector3d, err = pcall(require, "Vector3D")
@@ -12,6 +8,51 @@ if err and vector3d == false then
         return
     end
 end
+
+local ffi = require "ffi"
+ffi.cdef[[
+typedef struct {
+    int     command_number;     // 0x04 For matching server and client commands for debugging
+    float   pitch;
+    float   yaw;
+    float    forwardmove;
+    float    sidemove;
+    union {
+        unsigned int buttons;
+        struct {
+            unsigned int in_attack : 1;
+            unsigned int in_jump : 1;
+            unsigned int in_duck : 1;
+            unsigned int in_forward : 1;
+            unsigned int in_back : 1;
+            unsigned int in_use : 1;
+            unsigned int in_cancel : 1;
+            unsigned int in_left : 1;
+            unsigned int in_right : 1;
+            unsigned int in_moveleft : 1;
+            unsigned int in_moveright : 1;
+            unsigned int in_attack2 : 1;
+            unsigned int in_run : 1;
+            unsigned int in_reload : 1;
+            unsigned int in_alt1 : 1;
+            unsigned int in_alt2 : 1;
+            unsigned int in_score : 1;
+            unsigned int in_speed : 1;
+            unsigned int in_walk : 1;
+            unsigned int in_zoom : 1;
+            unsigned int in_weapon1 : 1;
+            unsigned int in_weapon2 : 1;
+            unsigned int in_bullrush : 1;
+            unsigned int in_grenade1 : 1;
+            unsigned int in_grenade2 : 1;
+            unsigned int in_attack3 : 1;
+            unsigned int in_unused : 6;
+        };
+    };
+} CUserCmd;
+]]
+local ffi_cast = ffi.cast
+local ct_usercmd = ffi.typeof('CUserCmd*')
 
 
 local GetUi = ui.get
@@ -83,11 +124,10 @@ local function is_grenade_or_bomb(weapon_id)
     end
 end
 
+AddEvent("setup_command", function(cmd)
+    local cmd = ffi_cast(ct_usercmd, cmd)
 
-AddEvent("run_command", function()
-
-	if not GetUi(ui.enabled) then 
-		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
+    if not GetUi(ui.enabled) then 
 		return 
 	end
 	if GetUi(ui.ragebot) then return end
@@ -99,20 +139,15 @@ AddEvent("run_command", function()
 	local is_grenade = is_grenade_or_bomb(entity.get_player_weapon(GetLocalPlayer()))
 
 	if is_grenade then
-		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
 	 	return 
 	end
 
 	local player = get_crosshair_entity()
-	if not player then return end
-
-	local originx, originy, originz = GetProp(player, "m_vecOrigin")
-	if originx == nil then return end
-
+    if not player then return end
+    
 	if GetProp(player, "m_iTeamNum") == GetProp(GetLocalPlayer(), "m_iTeamNum") then
-		client.exec("unbind " .. attack_key .. "; -attack")
-	else
-		client.exec("bind " .. attack_key .. " \"" .. attack_bind .. "\"")
+		cmd.in_attack = 0
 	end
+
 
 end)
