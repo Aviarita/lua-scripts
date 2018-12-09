@@ -15,6 +15,8 @@ client.set_event_callback("paint", function(ctx)
     for i=1, #players do 
         local eo = {x,y,z}
         eo.x, eo.y, eo.z = entity.get_prop(i, "m_vecOrigin")
+            
+        if eo-.x == nil then return end
 
         local distance = get_distance_in_feet(lpo.x,lpo.y,lpo.z,eo.x,eo.y,eo.z)
 
