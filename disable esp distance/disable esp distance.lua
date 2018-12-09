@@ -14,17 +14,17 @@ client.set_event_callback("paint", function(ctx)
 
     for i=1, #players do 
         local eo = {x,y,z}
-        eo.x, eo.y, eo.z = entity.get_prop(i, "m_vecOrigin")
+        eo.x, eo.y, eo.z = entity.get_prop(players[i], "m_vecOrigin")
             
         if eo.x == nil then return end
 
         local distance = get_distance_in_feet(lpo.x,lpo.y,lpo.z,eo.x,eo.y,eo.z)
 
         if distance > ui.get(max_distance) then
-            ui.set(plist_ref, i)
+            ui.set(plist_ref, players[i])
             ui.set(disable_vis, true)
         else
-            ui.set(plist_ref, i)
+            ui.set(plist_ref, players[i])
             ui.set(disable_vis, false)
         end
     end
