@@ -143,11 +143,9 @@ AddEvent("setup_command", function(cmd)
 	end
 
 	local player = get_crosshair_entity()
-    if not player then return end
+	if not player then return end
     
 	if GetProp(player, "m_iTeamNum") == GetProp(GetLocalPlayer(), "m_iTeamNum") then
 		cmd.in_attack = 0
 	end
-
-
 end)
