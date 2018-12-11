@@ -62,7 +62,6 @@ local distance = NewRef(vsls, plesp, "distance")
 local flags_ref = NewRef(vsls, plesp, "flags")
 local ammo_ref, ammo_ref_color_ref = NewRef(vsls, plesp, "ammo")
 local weapon_icon_ref, weapon_icon_color_ref = NewRef(vsls, plesp, "weapon icon")
-local lby_timer_ref = NewRef(vsls, plesp, "lby timer")
 local activation_type_ref = NewRef(vsls, plesp, "activation type")
 
 local esp_builder_checkbox = NewCheckbox(vsls, plesp, "ESP Builder")
@@ -477,12 +476,6 @@ AddEvent("paint", function()
         overall_height_addition_top_right = 40
     else
         overall_height_addition_top_right = 0
-    end
-
-    if GetUi(lby_timer_ref) then
-        overall_height_addition_bottom = 5
-    else 
-        overall_height_addition_bottom = 0
     end
 end)
 
