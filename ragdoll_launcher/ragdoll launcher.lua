@@ -6,6 +6,7 @@ client.set_event_callback("net_update_end", function()
     local ragdolls = entity.get_all("CCSRagdoll")
     for i=1, #ragdolls do 
         local ragdoll = ragdolls[i]
+        if ragdoll == nil then return end
 
         local mult = client.random_int(ui.get(min), ui.get(max))
 
