@@ -1,4 +1,4 @@
-local get, set_prop, get_prop, cb, slider, get_all, add_event = ui.get, entity.set_prop, entity.get_prop, ui.new_checkbox, ui.new_slider, entity.get_all, client.set_event_callback
+local get, set_prop, get_prop, cb, slider, get_all, add_event, get_lp = ui.get, entity.set_prop, entity.get_prop, ui.new_checkbox, ui.new_slider, entity.get_all, client.set_event_callback, entity.get_local_player
 local m_enable = cb("misc", "miscellaneous", "Ragdoll launcher")
 local m_mult = slider("misc", "miscellaneous", "\n ragdoll_launcher_multiplier", 0, 250, 0)
 local function launch_ragdoll(ragdoll)
@@ -10,6 +10,7 @@ local function launch_ragdoll(ragdoll)
 end
 add_event("net_update_end", function()
     if get(m_enable) == false then return end
+    if get_lp() == nil or get_lp() == 0 then return end
     local ragdolls = get_all("CCSRagdoll")
     for i=1, #ragdolls do 
         local ragdoll = ragdolls[i]
