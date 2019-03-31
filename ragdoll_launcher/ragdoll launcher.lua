@@ -10,7 +10,10 @@ local function launch_ragdoll(ragdoll)
 end
 add_event("net_update_end", function()
     if get(m_enable) == false then return end
-    if get_lp() == nil or get_lp() == 0 then return end
+    local me = get_lp()
+    if me == nil or me == 0 then return end
+    local lp_health = get_prop(me, "m_iHealth")
+    if lp_health < 1 then return end
     local ragdolls = get_all("CCSRagdoll")
     for i=1, #ragdolls do 
         local ragdoll = ragdolls[i]
