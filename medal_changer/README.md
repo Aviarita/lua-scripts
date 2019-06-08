@@ -1,2 +1,2 @@
 ![menu](https://i.imgur.com/pUooInS.png)
-![screen](https://i.imgur.com/aDcEG5l.png)
+![screen](https://i.imgur.com/mtqDHbg.png)
