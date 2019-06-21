@@ -5,7 +5,7 @@ local flag_limit = ui.reference("aa", "fake lag", "Limit")
 local set, get = ui.set, ui.get
 local enabled = ui.new_checkbox("aa", "anti-aimbot angles", "Legit AA")
 local swap_sides = ui.new_hotkey("aa", "anti-aimbot angles", "Legit AA", true)
-local disable_when_moving = ui.new_slider("aa", "anti-aimbot angles", "Velocity threshold", 0, 250, 10)
+local disable_when_moving = ui.new_slider("aa", "anti-aimbot angles", "Velocity threshold", 1, 250, 10)
 
 ui.set_callback(enabled, function(self)
     if get(self) then 
