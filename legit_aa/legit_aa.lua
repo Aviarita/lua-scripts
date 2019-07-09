@@ -2,10 +2,14 @@ local yaw, yaw_slider = ui.reference("aa", "anti-aimbot angles", "yaw")
 local body_yaw, body_yaw_slider = ui.reference("aa", "anti-aimbot angles", "body yaw")
 local lby_target = ui.reference("aa", "anti-aimbot angles", "lower body yaw target")
 local flag_limit = ui.reference("aa", "fake lag", "Limit")
-local set, get = ui.set, ui.get
 local enabled = ui.new_checkbox("aa", "anti-aimbot angles", "Legit AA")
 local swap_sides = ui.new_hotkey("aa", "anti-aimbot angles", "Legit AA", true)
 local disable_when_moving = ui.new_slider("aa", "anti-aimbot angles", "Velocity threshold", 1, 250, 10)
+
+local set, get = ui.set, ui.get
+local floor, min, sqrt = math.floor, math.min, math.sqrt
+local get_prop, get_lp = entity.get_prop, entity.get_local_player
+local indicator = renderer.indicator
 
 ui.set_callback(enabled, function(self)
     if get(self) then 
@@ -24,7 +28,7 @@ ui.set_callback(enabled, function(self)
     end
 end)
 local function length3d(self)
-    return math.floor(math.min(10000, math.sqrt( 
+    return floor(min(10000, sqrt( 
 		( self[1] * self[1] ) +
 		( self[2] * self[2] ) +
 		( self[3] * self[3] ))+ 0.5)
@@ -38,8 +42,8 @@ client.set_event_callback("run_command", function(e)
         set(body_yaw_slider, -180)
     end
 
-    local me = entity.get_local_player()
-    local my_vel = length3d({entity.get_prop(me, "m_vecVelocity")})
+    local me = get_lp()
+    local my_vel = length3d({get_prop(me, "m_vecVelocity")})
     if my_vel > get(disable_when_moving) then 
         set(yaw, "Off")
         set(body_yaw, "Off")
@@ -56,8 +60,8 @@ end)
 client.set_event_callback("paint", function()
     if get(enabled) == false then return end
     if get(body_yaw_slider) == -180 then 
-        renderer.indicator(255, 255,255, 255, "RIGHT")
+        indicator(255, 255,255, 255, "RIGHT")
     elseif get(body_yaw_slider) == 180 then 
-        renderer.indicator(255, 255,255, 255, "LEFT")
+        indicator(255, 255,255, 255, "LEFT")
     end
 end)
