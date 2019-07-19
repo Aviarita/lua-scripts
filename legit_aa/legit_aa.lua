@@ -34,31 +34,39 @@ local function length3d(self)
 		( self[3] * self[3] ))+ 0.5)
 	)
 end
-client.set_event_callback("run_command", function(e)
-    if get(enabled) == false then return end
-    if get(swap_sides) then 
-        set(body_yaw_slider, 180)
-    else
-        set(body_yaw_slider, -180)
-    end
 
+local disabled_aa = false
+client.set_event_callback("setup_command", function(cmd)
+    if get(enabled) == false then return end
     local me = get_lp()
     local my_vel = length3d({get_prop(me, "m_vecVelocity")})
-    if my_vel > get(disable_when_moving) then 
+    if my_vel > get(disable_when_moving) or (cmd.in_use and cmd.in_attack2 and cmd.in_attack) == 1 then 
         set(yaw, "Off")
         set(body_yaw, "Off")
         set(lby_target, "Off")
         set(flag_limit, 1)
-    else
-        set(yaw, "180")
-        set(body_yaw, "Static")
-        set(lby_target, "Opposite")
-        set(flag_limit, 4)
+        disabled_aa = true
+    else 
+        if disabled_aa then 
+            set(yaw, "180")
+            set(body_yaw, "Static")
+            set(lby_target, "Opposite")
+            set(flag_limit, 4)
+            disabled_aa = false
+        end
+    end
+
+    if disabled_aa == false then 
+        if get(swap_sides) then 
+            set(body_yaw_slider, 180)
+        else
+            set(body_yaw_slider, -180)
+        end
     end
 end)
 
 client.set_event_callback("paint", function()
-    if get(enabled) == false then return end
+    if get(enabled) == false or disabled_aa then return end
     if get(body_yaw_slider) == -180 then 
         indicator(255, 255,255, 255, "RIGHT")
     elseif get(body_yaw_slider) == 180 then 
