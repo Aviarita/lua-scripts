@@ -95,7 +95,7 @@ client.set_event_callback("setup_command", function(cmd)
 end)
 
 client.set_event_callback("paint", function()
-    if get(enabled) == false or disabled_aa then return end
+    if get(enabled) == false then return end
     if get(body_yaw_slider) == -180 then 
         indicator(255, 255,255, 255, "RIGHT")
     elseif get(body_yaw_slider) == 180 then 
