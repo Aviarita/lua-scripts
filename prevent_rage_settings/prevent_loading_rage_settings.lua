@@ -27,7 +27,7 @@ AddEvent("run_command", function()
         SetUi(pitch, "Off")
         SetUi(yaw, "Off")
         SetUi(lby, "Off")
-        SetUi(fakeyaw, "Off")
+        SetUi(bodyyaw, "Off")
         SetUi(anti_ut, true)
     end
 end)
