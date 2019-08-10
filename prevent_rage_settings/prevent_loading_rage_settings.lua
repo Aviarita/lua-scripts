@@ -5,7 +5,7 @@ local spread = ui.reference("RAGE", "Other", "Remove spread")
 local recoil = ui.reference("RAGE", "Other", "Remove recoil")
 local pitch = ui.reference("AA", "Anti-Aimbot angles", "Pitch")
 local yaw = ui.reference("AA", "Anti-Aimbot angles", "Yaw")
-local fakeyaw = ui.reference("AA", "Anti-Aimbot angles", "Fake yaw")
+local fakeyaw = ui.reference("AA", "Anti-Aimbot angles", "Body yaw")
 local anti_ut = ui.reference("MISC", "Settings", "Anti-untrusted")
 
 local checkbox = ui.new_checkbox("MISC", "Other", "Prevent loading rage settings")
