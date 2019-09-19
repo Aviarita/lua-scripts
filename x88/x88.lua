@@ -1,5 +1,11 @@
 -- local variables for API functions. any changes to the line below will be lost on re-generation
-require("libs/surface")
+package.path = package.path .. ".\\?.lua;.\\?.ljbc;.\\lib\\?.lua;.\\libs\\?.lua;.\\lib\\?.ljbc;.\\libs\\?.ljbc;"
+local surface, err = pcall(require, "surface")
+if err and surface == false then
+    client.log(err)
+    error("Please download the surface library and name it surface.ljbc/.lua to use this script")
+    return
+end
 local ffi = require("ffi")
 
 local 
