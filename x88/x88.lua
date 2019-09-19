@@ -52,6 +52,9 @@ local function round(b, c)
     local d = 10 ^ (c or 0)
     return math_floor(b * d + 0.5) / d
 end
+
+local x88Toggle = ui_new_hotkey("misc", "settings", "Toggle x88Menu")
+
 local aimbot = ui_reference("legit", "Aimbot", "Enabled")
 local triggerbot = ui_reference("legit", "Triggerbot", "Enabled")
 local backtrack = ui_reference("legit", "Other", "Accuracy boost")
@@ -743,17 +746,19 @@ local function OnPaint(ctx)
 
     local fps = accumulate_fps()
 
-    local lp_address = ffi_cast("int*", get_client_entity(ent_list, GetLocalPlayer()))[0]
 
-    -- watermark shit
-    renderer.draw_text(basex, 5 + multiplier - 15, 255, 255, 0, 255, STahoma, "Hello esoterik :)")
-    renderer.draw_text(basex, 5 + multiplier, 255, 255, 0, 255, STahoma, "Hello avaster :)")
-    renderer.draw_text(basex + 120, 5 + multiplier, 255, 255, 0, 255, STahoma, "LocalPlayer: " .. DEC_HEX(lp_address))
-    -- functions!!
-    if ui_get(rageaimbot) and ui_get(rageaimbothotkey) then 
-        draw_ragebot(multiplier, m_iKills, m_iDeaths, fps)
-    else
-        draw_legitbot(multiplier, m_iKills, m_iDeaths, fps)
+    if ui_get(x88Toggle) then 
+        local lp_address = ffi_cast("int*", get_client_entity(ent_list, GetLocalPlayer()))[0]
+        -- watermark shit
+        renderer.draw_text(basex, 5 + multiplier - 15, 255, 255, 0, 255, STahoma, "Hello esoterik :)")
+        renderer.draw_text(basex, 5 + multiplier, 255, 255, 0, 255, STahoma, "Hello avaster :)")
+        renderer.draw_text(basex + 120, 5 + multiplier, 255, 255, 0, 255, STahoma, "LocalPlayer: " .. DEC_HEX(lp_address))
+        -- functions!!
+        if ui_get(rageaimbot) and ui_get(rageaimbothotkey) then 
+            draw_ragebot(multiplier, m_iKills, m_iDeaths, fps)
+        else
+            draw_legitbot(multiplier, m_iKills, m_iDeaths, fps)
+        end
     end
 end
 
