@@ -112,8 +112,8 @@ local lby = ui_reference("AA", "Anti-aimbot angles", "Lower body yaw target")
 
 local screenx, screeny = client.screen_size()
 
-local x_offset = ui_new_slider("visuals", "other esp", "x88Menu Offset X", 0, screenx, 110)
-local y_offset = ui_new_slider("visuals", "other esp", "x88Menu Offset Y", 0, screeny, 100)
+local x_offset = ui_new_slider("misc", "settings", "x88Menu Offset X", 0, screenx, 110)
+local y_offset = ui_new_slider("misc", "settings", "x88Menu Offset Y", 0, screeny, 100)
 
 local table_insert, table_remove = table.insert, table.remove
 local globals_realtime, globals_absoluteframetime, globals_tickinterval =
