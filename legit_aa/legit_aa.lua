@@ -13,7 +13,7 @@ local target_hitbox = ui.reference("rage", "aimbot", "target hitbox")
 local minimum_hitchance = ui.reference("rage", "aimbot", "minimum hit chance")
 local minimum_minimum_damage = ui.reference("rage", "aimbot", "minimum damage")
 local fov = ui.reference("rage", "aimbot", "maximum fov")
-local fake_shadow = ui.reference("visuals", "colored models", "local fake shadow")
+local fake_shadow = ui.reference("visuals", "colored models", "local player fake")
 
 local set, get, vis = ui.set, ui.get, ui.set_visible
 local floor, min, sqrt = math.floor, math.min, math.sqrt
