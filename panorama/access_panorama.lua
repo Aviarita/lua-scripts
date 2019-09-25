@@ -43,15 +43,17 @@ local function get_parent(panelptr)
     return a_get_parent(panelptr)
 end
 
-local function get_root(uiengineptr)
+local function get_root(uiengineptr, custompanel)
     local panel = get_last_target_panel(uiengineptr)
     local itr = panel
     local ret = nil
     local panelptr = ffi.cast("void***", itr)
     while itr and is_valid_panel_ptr(uiengineptr, itr) do 
         panelptr = ffi.cast("void***", itr)
-        --print(string.format("Panel: %s", get_panel_id(panelptr)))
-        if get_panel_id(panelptr) == "CSGOHud" then 
+        if custompanel and get_panel_id(panelptr) == custompanel then 
+            ret = itr
+            break
+        elseif get_panel_id(panelptr) == "CSGOHud" then 
             ret = itr
             break
         elseif get_panel_id(panelptr) == "CSGOMainMenu" then 
@@ -68,11 +70,18 @@ local run_script = ffi.cast("run_script_t", uiengine[0][113])
 
 local rootpanel = get_root(uiengine)
 
-local function eval(code)
-    if rootpanel == nil then    
-        rootpanel = get_root(uiengine)
+local function eval(code, custompanel)
+    if custompanel then 
+        rootpanel = custompanel
+    else
+        if rootpanel == nil then    
+            rootpanel = get_root(uiengine)
+        end
     end
     run_script(uiengine, rootpanel, ffi.string(code), "panorama/layout/base_mainmenu.xml", 8, 10, false, false)
+end
+local function get_child(childname)
+    return get_root(uiengine, childname)
 end
 local function change_visiblity(childptr, state)
     local panelptr = ffi.cast("void***", childptr)
@@ -82,16 +91,17 @@ local function change_visiblity(childptr, state)
         error("Invalid panel..", 2)
     end
 end
-local function get_name(childptr)
+local function get_child_name(childptr)
     local panelptr = ffi.cast("void***", childptr)
     if is_valid_panel_ptr(uiengine, childptr) then 
-        return get_panel_id(panelptr)
+        return ffi.string(get_panel_id(panelptr))
     else
         error("Invalid panel..", 2)
     end
 end
 return {
     eval = eval,
-    get_name = get_name,
+    get_child = get_child,
+    get_child_name = get_child_name,
     set_visible = change_visiblity
 }
