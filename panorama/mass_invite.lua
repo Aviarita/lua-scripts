@@ -61,3 +61,12 @@ ui.new_button("lua", "a", "Print invite collection", function()
         $.Msg(collectedSteamIDS);
     ]])
 end)
+ui.new_button("lua", "a", "Invite all friends", function()
+    js.eval([[
+        var friends = FriendsListAPI.GetCount();
+        for (var id = 0; id < friends; id++) {
+            var xuid = FriendsListAPI.GetXuidByIndex(id);
+            FriendsListAPI.ActionInviteFriend(xuid, "");
+        }
+    ]]) 
+end)
