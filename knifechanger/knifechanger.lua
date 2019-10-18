@@ -2,11 +2,8 @@
 local bit_band, client_create_interface, client_set_event_callback, entity_get_local_player, entity_get_prop, entity_set_prop, require, ui_get, ui_new_checkbox, ui_new_combobox, ui_new_textbox, ui_reference, ui_set, ui_set_callback, ui_set_visible = bit.band, client.create_interface, client.set_event_callback, entity.get_local_player, entity.get_prop, entity.set_prop, require, ui.get, ui.new_checkbox, ui.new_combobox, ui.new_textbox, ui.reference, ui.set, ui.set_callback, ui.set_visible
 
 local ffi = require("ffi")
-
 ffi.cdef("typedef int(__thiscall* get_model_index_t)(void*, const char*)")
-local class_ptr = ffi.typeof("void***")
-local rawivmodelinfo = client_create_interface("engine.dll", "VModelInfoClient004")
-local ivmodelinfo = ffi.cast(class_ptr, rawivmodelinfo)
+local ivmodelinfo = ffi.cast(ffi.typeof("void***"), client_create_interface("engine.dll", "VModelInfoClient004"))
 local get_model_index = ffi.cast("get_model_index_t", ivmodelinfo[0][2])
 
 local knife_options_ref_cb, knife_options_ref_cm = ui_reference("skins", "knife options", "override knife")
@@ -35,7 +32,6 @@ local indices = {
 
 local knife_options_cb = ui_new_checkbox("skins", "knife options", "Override knife")
 local knife_options_cmb = ui_new_combobox("skins", "knife options", "\nknife models", knifiesc)
-local knife_custom_name = ui_new_textbox("skins", "knife options", "knife name")
 local weaponkit_enable = ui_reference("skins", "weapon skin", "enabled")
 local weaponkit_stattrack = ui_reference("skins", "weapon skin", "stattrak")
 
@@ -92,9 +88,8 @@ local function get_all_weapons(ent)
 end
 
 local update_skins = false
-local function update_knife_model(m_hWeapon, m_hViewModel, model_index, name, wpn_idx)
+local function update_knife_model(m_hWeapon, m_hViewModel, model_index, wpn_idx)
     entity_set_prop(m_hWeapon, "m_iItemDefinitionIndex", wpn_idx)
-    entity_set_prop(m_hWeapon, "m_szCustomName", name)
     if ui_get(weaponkit_enable) and ui_get(weaponkit_stattrack) then 
         entity_set_prop(m_hWeapon, "m_iEntityQuality", 3)
     end
@@ -123,7 +118,7 @@ client_set_event_callback("net_update_end", function()
         if knifes[wpn_idx] then 
             local m_iItemDefinitionIndex = indices[ui_get(knife_options_cmb)] or wpn_idx
             local model_index = get_model_index(ivmodelinfo, models[ui_get(knife_options_cmb)])
-            update_knife_model(m_hWeapon, m_hViewModel, model_index, nil, m_iItemDefinitionIndex)
+            update_knife_model(m_hWeapon, m_hViewModel, model_index, m_iItemDefinitionIndex)
         else
             update_skins = true
         end
