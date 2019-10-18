@@ -1,5 +1,5 @@
 -- local variables for API functions. any changes to the line below will be lost on re-generation
-local bit_band, client_create_interface, client_set_event_callback, entity_get_local_player, entity_get_prop, entity_set_prop, require, ui_get, ui_new_checkbox, ui_new_combobox, ui_new_textbox, ui_reference, ui_set, ui_set_callback, ui_set_visible = bit.band, client.create_interface, client.set_event_callback, entity.get_local_player, entity.get_prop, entity.set_prop, require, ui.get, ui.new_checkbox, ui.new_combobox, ui.new_textbox, ui.reference, ui.set, ui.set_callback, ui.set_visible
+local bit_band, client_create_interface, client_set_event_callback, entity_is_alive, entity_get_local_player, entity_get_prop, entity_set_prop, require, ui_get, ui_new_checkbox, ui_new_combobox, ui_new_textbox, ui_reference, ui_set, ui_set_callback, ui_set_visible = bit.band, client.create_interface, client.set_event_callback, entity.is_alive, entity.get_local_player, entity.get_prop, entity.set_prop, require, ui.get, ui.new_checkbox, ui.new_combobox, ui.new_textbox, ui.reference, ui.set, ui.set_callback, ui.set_visible
 
 local ffi = require("ffi")
 ffi.cdef("typedef int(__thiscall* get_model_index_t)(void*, const char*)")
@@ -111,7 +111,7 @@ client_set_event_callback("net_update_end", function()
     local m_hWeapon = entity_get_prop(m_hViewModel, "m_hWeapon")
     if m_hWeapon == nil then return end
 
-    if entity.is_alive(me) == false then return end
+    if entity_is_alive(me) == false then return end
     
     local wpn_idx = bit_band(entity_get_prop(m_hWeapon, "m_iItemDefinitionIndex") or 0, 0xFFFF)
     if wpn_idx == nil then return end
