@@ -110,6 +110,8 @@ client_set_event_callback("net_update_end", function()
 
     local m_hWeapon = entity_get_prop(m_hViewModel, "m_hWeapon")
     if m_hWeapon == nil then return end
+
+    if entity_is_alive(me) ==false then return end
     
     local wpn_idx = bit_band(entity_get_prop(m_hWeapon, "m_iItemDefinitionIndex") or 0, 0xFFFF)
     if wpn_idx == nil then return end
