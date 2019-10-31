@@ -59,6 +59,11 @@ ui.new_button("misc", "Lua", "Create lua from clipboard", function()
 end)
 filename = ui.new_textbox("misc", "lua", "Create lua from clipboard")
 
+ui.set_callback(randomize_filename, function(self)
+    ui.set_visible(filename, not ui.get(self))
+end)
+ui.set_visible(filename, ui.get(randomize_filename))
+
 function string:split(sep)
     local sep, fields = sep or ":", {}
     local pattern = string.format("([^%s]+)", sep)
