@@ -35,18 +35,29 @@ asp(fs, p, "GAME", 0)
 
 local created_files = {}
 
+local filename = nil
+local randomize_filename = ui.new_checkbox("misc", "lua", "Randomize file name")
 ui.new_button("misc", "Lua", "Create lua from clipboard", function()
+    local fileName = ui.get(randomize_filename) and random_file_name(16) or ui.get(filename)
+    if fileName:len() < 1 then 
+        error("you need to enter a file name")
+    end
+    if fileName:find(".lua") then 
+        fileName = fileName:gsub(".lua", "")
+    end
+    fileName = fileName .. ".lua"
+
     local bufferSize = gcpbs(isystem)
     local char = ffi.new("char[?]", bufferSize)
     gcpbt(isystem, 0, char, bufferSize * ffi.sizeof("char[?]", bufferSize))
     local source = ffi.string(char)
-    local filename = random_file_name(16) ..".lua"
-    print("Created " .. filename)
-    table.insert(created_files, filename)
-    local file = filesystem.open_file(filename, "GAME", "w")
+    print("Created " .. fileName)
+    table.insert(created_files, fileName)
+    local file = filesystem.open_file(fileName, "GAME", "w")
     file:write(source)
     file:close()
 end)
+filename = ui.new_textbox("misc", "lua", "Create lua from clipboard")
 
 function string:split(sep)
     local sep, fields = sep or ":", {}
@@ -65,7 +76,12 @@ client.set_event_callback("console_input", function(cmd)
                 return true
             end
             local curFile = args[1] local newFile = args[2]
-            mv(fs, curFile, newFile, "GAME")
+            if mv(fs, curFile, newFile, "GAME") then 
+                print("successfully renamed " .. curFile .. " to " .. newFile)
+            else
+                error("something wen't wrong when trying to rename the lua, please check the entered arguments.")
+            end
+            
         end
         return true
     elseif string.find(cmd, "ls") then
