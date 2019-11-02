@@ -72,7 +72,8 @@ function string:split(sep)
  end
 
 client.set_event_callback("console_input", function(cmd)
-    if string.find(cmd, "mv ") then
+    local tmpCmd = string.sub(cmd, 1, 3) 
+    if tmpCmd == "mv " then
         if cmd:len() > string.len("mv ") then
             local cmd = cmd:gsub("mv ", "")
             local args = cmd:split(" ")
@@ -89,7 +90,7 @@ client.set_event_callback("console_input", function(cmd)
             
         end
         return true
-    elseif string.find(cmd, "ls") then
+    elseif tmpCmd == "ls" then
         if #created_files < 1 then 
             print("you haven't created any files yet.")
             return true
