@@ -31,7 +31,6 @@ ffi.cdef[[
         int m_current_objects;
     }; 
     typedef void*(__thiscall* get_client_entity_t)(void*, int);
-    typedef void*(__thiscall* get_client_entity_t)(void*, int);
     typedef int(__thiscall* get_highest_entity_by_index_t)(void*);
 ]]
 
@@ -40,25 +39,29 @@ local get_client_entity = ffi.cast("get_client_entity_t", ientitylist[0][3])
 local get_highest_entity_by_index = ffi.cast("get_highest_entity_by_index_t", ientitylist[0][6])
 
 local glow_object_manager = ffi.cast("struct c_glow_object_mngr**", ffi.cast("char*", client.find_signature("client_panorama.dll", "\x0F\x11\x05\xCC\xCC\xCC\xCC\x83\xC8\x01") ) + 3)[0]
-
 client.set_event_callback("paint", function(ctx)
     local coinEnts = {}
+
     for i=1, get_highest_entity_by_index(ientitylist) do 
         local classname = entity.get_classname(i) 
         if classname == "CDynamicProp" then 
-            local pos = {entity.get_prop(i, "m_vecOrigin")}
-            local modelindex = entity.get_prop(i, "m_nModelIndex")
-            if modelindex == 284 then 
-                table.insert(coinEnts, get_client_entity(ientitylist, i))
-                if pos[1] ~= nil and pos[1] ~= 0 then 
-                    local wx, wy = renderer.world_to_screen(pos[1], pos[2], pos[3])
-                    if wx ~= nil then 
-                        renderer.text(wx, wy, 255, 255, 255, 255, "c-", 999, "COIN")
+            local materials = materialsystem.get_model_materials(i)
+            for j=1, #materials do 
+                local model = materials[j]:get_name()
+                if model:find("coop/challenge_coin") then 
+                    table.insert(coinEnts, get_client_entity(ientitylist, i))
+                    local pos = {entity.get_prop(i, "m_vecOrigin")}
+                    if pos[1] ~= nil and pos[1] ~= 0 then 
+                        local wx, wy = renderer.world_to_screen(pos[1], pos[2], pos[3])
+                        if wx ~= nil then 
+                            renderer.text(wx, wy, 255, 255, 255, 255, "c-", 999, "COIN")
+                        end
                     end
                 end
             end
         end
     end
+
     if #coinEnts > 1 then 
         for j=1, #coinEnts do 
             for i=0, glow_object_manager.m_size do 
