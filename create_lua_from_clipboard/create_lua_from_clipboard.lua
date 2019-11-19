@@ -36,8 +36,8 @@ asp(fs, p, "GAME", 0)
 local created_files = {}
 
 local filename = nil
-local randomize_filename = ui.new_checkbox("misc", "lua", "Randomize file name")
-ui.new_button("misc", "Lua", "Create lua from clipboard", function()
+local randomize_filename = ui.new_checkbox("config", "lua", "Randomize file name")
+ui.new_button("config", "Lua", "Create lua from clipboard", function()
     local fileName = ui.get(randomize_filename) and random_file_name(16) or ui.get(filename)
     if fileName:len() < 1 then 
         error("you need to enter a file name")
@@ -57,7 +57,7 @@ ui.new_button("misc", "Lua", "Create lua from clipboard", function()
     file:write(source)
     file:close()
 end)
-filename = ui.new_textbox("misc", "lua", "Create lua from clipboard")
+filename = ui.new_textbox("config", "lua", "Create lua from clipboard")
 
 ui.set_callback(randomize_filename, function(self)
     ui.set_visible(filename, not ui.get(self))
