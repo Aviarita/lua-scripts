@@ -8,3 +8,4 @@
 ## Informations
 
 Its really important that this lua is named aaaaaaaaaaaa.lua and is loaded before revo.ljbc, otherwise it wont work
+Its also important that you dont use "predict resolve" in "Anti-aim improvments" as it wont work
