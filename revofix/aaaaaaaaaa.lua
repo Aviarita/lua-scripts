@@ -1,6 +1,6 @@
 local ui_reference = ui.reference
 local twist = ui.new_checkbox("AA", "Anti-aimbot angles", "Twist(Useless)")
-local twist = ui.new_checkbox("RAGE", "Aimbot", "Stomach hitbox scale(Useless)")
+local shs = ui.new_checkbox("RAGE", "Aimbot", "Stomach hitbox scale(Useless)")
 function ui.reference(tab, container, name)
     if name == "Infinite duck" then 
         return ui_reference("misc", "movement", "Infinite duck")
