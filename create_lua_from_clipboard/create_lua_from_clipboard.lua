@@ -1,6 +1,6 @@
 local ffi = require("ffi")
 package.path = package.path .. ".\\?.lua;.\\?.ljbc;.\\lib\\?.lua;.\\libs\\?.lua;.\\lib\\?.ljbc;.\\libs\\?.ljbc;"
-local filesystem = require("ifilesystem")
+local filesystem = require("filesystem")
 
 ffi.cdef[[
     typedef void(__thiscall* asp_t)(void*, const char*, const char*, int);
