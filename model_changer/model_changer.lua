@@ -129,6 +129,8 @@ local rawnetworkstringtablecontainer = client.create_interface("engine.dll", "VE
 local networkstringtablecontainer = ffi.cast(class_ptr, rawnetworkstringtablecontainer) or error("rawnetworkstringtablecontainer is nil", 2)
 local find_table = ffi.cast("find_table_t", networkstringtablecontainer[0][3]) or error("find_table is nil", 2)
 
+local cl_fullupdate = cvar.cl_fullupdate
+
 local model_names = {}
 for k,v in pairs(player_models) do
     table.insert(model_names, k)
@@ -136,8 +138,10 @@ end
 
 local replace_models = ui.new_checkbox("lua", "a", "Replace weapon models")
 local replace_player_models = ui.new_checkbox("lua", "a", "Replace player models")
-local t_choosen_player_model = ui.new_combobox("lua", "a", "T model", model_names)
-local ct_choosen_player_model = ui.new_combobox("lua", "a", "CT model", model_names)
+local t_player_model = ui.new_combobox("lua", "a", "T model", model_names)
+local ct_player_model = ui.new_combobox("lua", "a", "CT model", model_names)
+local replace_localplayer_model = ui.new_checkbox("lua", "a", "Replace localplayer model")
+local localplayer_model = ui.new_combobox("lua", "a", "\nmodel", model_names)
 
 local function precache_model(modelname)
     local rawprecache_table = find_table(networkstringtablecontainer, "modelprecache") or error("couldnt find modelprecache", 2)
@@ -168,7 +172,7 @@ local function set_model_index(entity, idx)
     end
 end
 
-local function change_model(ent, model, isWeapon, ent2)
+local function change_model(ent, model)
     if model:len() > 5 then 
         if precache_model(model) == false then 
             error("invalid model", 2)
@@ -192,15 +196,19 @@ client.set_event_callback("net_update_start", function()
         for i=1, #players do 
             local player = players[i]
             local teamnum = entity.get_prop(player, "m_iTeamNum")
-            if entity.is_alive(player) and not entity.is_dormant(player) then 
+            if entity.is_alive(player) and not entity.is_dormant(player) and player ~= me then 
                 if teamnum == 2 then
-                    change_model(player, player_models[ui.get(t_choosen_player_model)], false)
+                    change_model(player, player_models[ui.get(t_player_model)])
                 elseif teamnum == 3 then
-                    change_model(player, player_models[ui.get(ct_choosen_player_model)], false)
+                    change_model(player, player_models[ui.get(ct_player_model)])
                 end
             end
         end
-    end
+	end
+	
+	if ui.get(replace_localplayer_model) then 
+		change_model(me, player_models[ui.get(localplayer_model)])
+	end
 
     if ui.get(replace_models) then 
         local m_hViewModel = entity.get_prop(me, "m_hViewModel[0]")
@@ -217,7 +225,7 @@ client.set_event_callback("net_update_start", function()
             change_model(m_hViewModel, weapon_models[wpn_idx])
             change_model(m_hWeapon, weapon_models[wpn_idx])
             if update_skins then 
-                cvar.cl_fullupdate:invoke_callback()
+                cl_fullupdate:invoke_callback()
                 update_skins = false
             end
         else
