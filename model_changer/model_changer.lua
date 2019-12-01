@@ -1,6 +1,6 @@
 local player_models = {
     -- [Menu name] = path to model
-    ["Hitler"] = "models/player/custom_player/kuristaja/hitler/hitler.mdl", -- example line path/to/model 
+    ["Hitler"] = "models/player/custom_player/kuristaja/hitler/hitler.mdl", -- example line
 }
 
 local weapon_models = {
