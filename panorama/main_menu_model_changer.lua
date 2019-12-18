@@ -100,23 +100,9 @@ local customplayers = {
 	{"FBI (Variant C)", "models/player/custom_player/legacy/ctm_fbi_variantc.mdl", false},
 	{"FBI (Variant D)", "models/player/custom_player/legacy/ctm_fbi_variantd.mdl", false},
 	{"FBI (Variant E)", "models/player/custom_player/legacy/ctm_fbi_variante.mdl", false},
-    {"SAS", "models/player/custom_player/legacy/ctm_sas.mdl", false},
+    	{"SAS", "models/player/custom_player/legacy/ctm_sas.mdl", false},
 
-    {"Hitler", "models/player/custom_player/kuristaja/hitler/hitler.mdl", true},
-	{"Deadpool", "models/player/custom_player/kuristaja/deadpool/deadpool.mdl", true},
-	{"Alien", "models/player/custom_player/kuristaja/fo4/alien/alien.mdl", true},
-	{"Helena", "models/player/custom_player/kuristaja/re6/helena/helena.mdl", true},
-	{"Shepard", "models/player/custom_player/kuristaja/shepard/shepard.mdl", true},
-	{"Slickman", "models/player/custom_player/kuristaja/slickman/slickman.mdl", true},
-	{"Banana Joe", "models/player/custom_player/kuristaja/banana_joe/banana_joe.mdl", true},
-	{"Hatsune Miku", "models/player/custom_player/monsterko/haku_wedding_dress/haku_v3.mdl", true},
-	{"Inori Yuzuriha", "models/player/custom_player/monsterko/inori_yuzuriha/inori.mdl", true},
-	{"L4D2 Tank", "models/player/custom_player/caleon1/l4d2_tank/l4d2_tank.mdl", true},
-	{"Lara croft", "models/player/custom_player/nf/lara/lara.mdl", true},
-	{"Lara croft bikini", "models/player/custom_player/nf/lara/lara_biki.mdl", true},
-	{"Agent47", "models/player/custom_player/voikanaa/hitman/agent47.mdl", true},
-	{"Nanosuit", "models/player/custom_player/kuristaja/nanosuit/nanosuitv3.mdl", true},
-	{"Connor", "models/player/custom_player/caleon1/connor/connor.mdl"}
+    	{"Hitler", "models/player/custom_player/kuristaja/hitler/hitler.mdl", true},
 }
 local dances = {
     {"Fonzie_Pistol", "Emote_Fonzie_Pistol"},
