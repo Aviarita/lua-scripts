@@ -238,7 +238,7 @@ end)
 ui.set_callback(show_fortnite_dances, function(s)
     ui.set_visible(dance_reference, ui.get(s))
 end)
-local ins = require("libs/inspect")
+
 local function do_dance() 
     if ui.get(model_reference) == 0 then 
         js.eval([[
