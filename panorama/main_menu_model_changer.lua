@@ -226,6 +226,9 @@ ui.set_callback(show_fortnite_dances, function(s)
 end)
 
 local function do_dance() 
+	if entity.get_local_player() then 
+        	return
+    	end
     if ui.get(model_reference) == 0 then 
         js.eval([[
             model.visible = false;
