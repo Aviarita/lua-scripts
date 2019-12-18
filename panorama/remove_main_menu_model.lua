@@ -4,6 +4,6 @@ ui.set_callback(show, function(self)
     local state = ui.get(self)
     js.eval([[
         var model = $.GetContextPanel().GetChild(0).FindChildInLayoutFile( 'JsMainmenu_Vanity' );
-        elModel.visible = ]].. state .. [[;
+        model.visible = ]].. state .. [[;
     ]])
 end)
