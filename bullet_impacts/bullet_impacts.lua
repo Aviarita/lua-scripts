@@ -24,7 +24,6 @@ ffi.cdef[[
 
 local debug_overlay = ffi.cast(ffi.typeof("void***"), client.create_interface("engine.dll", "VDebugOverlay004"))
 local add_box_overlay = ffi.cast("add_box_overlay_t", debug_overlay[0][1])
-local rbot, rbothk = ui.reference("rage", "aimbot", "enabled")
 
 local sin, cos, rad = math.sin, math.cos, math.rad
 function angle_forward( angle ) -- angle -> direction vector (forward)
