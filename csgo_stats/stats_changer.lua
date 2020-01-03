@@ -4,7 +4,7 @@ ffi.cdef[[
     typedef struct {
 		void* pad[5];
 		void* steam_user_stats; // 5
-    } steam_ctx_t;
+    } csgo_stats_changer_steam_ctx_t;
 
     typedef bool(__thiscall* get_stat_t)(void*, const char*, int32_t*);
     typedef bool(__thiscall* set_stat_t)(void*, const char*, int32_t);
@@ -16,12 +16,13 @@ ffi.cdef[[
 local isystem = ffi.cast(ffi.typeof("void***"), client.create_interface("vgui2.dll", "VGUI_System010"))
 local get_command_line = ffi.cast("get_command_line_t", isystem[0][23])
 
+-- DO NOT EDIT THIS LINE AS THE STATS CHANGER MAY CAUSE VAC BANS WHEN USED OUTSIDE OF THE INSECURE MODE
 if not ffi.string(get_command_line(isystem)):find("-insecure") then 
     error("-insecure wasnt detected, stopping the cheat from loading the lua")
 end
 
 local steam_ctx_match = client.find_signature("client_panorama.dll", "\xFF\x15\xCC\xCC\xCC\xCC\xB9\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\x6A") or error("steam_ctx")
-local steam_ctx = ffi.cast("steam_ctx_t**", ffi.cast("char*", steam_ctx_match) + 7)[0] or error("steam_ctx not found")
+local steam_ctx = ffi.cast("csgo_stats_changer_steam_ctx_t**", ffi.cast("char*", steam_ctx_match) + 7)[0] or error("steam_ctx not found")
 local steam_user_stats = steam_ctx.steam_user_stats
 local steam_user_stats_vtable = ffi.cast("void***", steam_user_stats)[0] or error("steam_user_stats error")
 
