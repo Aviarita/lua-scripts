@@ -31,7 +31,7 @@ end
 
 local p = ffi.new("char[260]")
 gcd(fs, p, ffi.sizeof(p))
-asp(fs, p, "GAME", 0)
+asp(fs, p, "XGAME", 0)
 
 local created_files = {}
 
@@ -53,7 +53,7 @@ ui.new_button("config", "Lua", "Create lua from clipboard", function()
     local source = ffi.string(char)
     print("Created " .. fileName)
     table.insert(created_files, fileName)
-    local file = filesystem.open_file(fileName, "GAME", "w")
+    local file = filesystem.open_file(fileName, "XGAME", "w")
     file:write(source)
     file:close()
 end)
@@ -62,7 +62,7 @@ filename = ui.new_textbox("config", "lua", "Create lua from clipboard")
 ui.set_callback(randomize_filename, function(self)
     ui.set_visible(filename, not ui.get(self))
 end)
-ui.set_visible(filename, ui.get(randomize_filename))
+ui.set_visible(filename, not ui.get(randomize_filename))
 
 function string:split(sep)
     local sep, fields = sep or ":", {}
@@ -82,7 +82,7 @@ client.set_event_callback("console_input", function(cmd)
                 return true
             end
             local curFile = args[1] local newFile = args[2]
-            if mv(fs, curFile, newFile, "GAME") then 
+            if mv(fs, curFile, newFile, "XGAME") then 
                 print("successfully renamed " .. curFile .. " to " .. newFile)
             else
                 error("something wen't wrong when trying to rename the lua, please check the entered arguments.")
@@ -103,5 +103,5 @@ client.set_event_callback("console_input", function(cmd)
 end)
 
 client.set_event_callback("shutdown", function(cmd)
-    rsp(fs, p, "GAME")
+    rsp(fs, p, "XGAME")
 end)
