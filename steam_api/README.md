@@ -1,6 +1,7 @@
 # SteamAPI
 
 ### Classes:
+* [ISteamClient](https://partner.steamgames.com/doc/api/ISteamClient)
 * [ISteamAppList](https://github.com/Aviarita/steam_sdk/blob/master/isteamapplist.h#L22)
 * [ISteamApps](https://partner.steamgames.com/doc/api/ISteamApps)
 * [ISteamController](https://partner.steamgames.com/doc/api/ISteamController)
