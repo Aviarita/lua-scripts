@@ -235,6 +235,114 @@ end
 local steam_ctx_match = client.find_signature("client_panorama.dll", "\xFF\x15\xCC\xCC\xCC\xCC\xB9\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\x6A") or error("steam_ctx")
 local steam_ctx = ffi.cast("steam_api_ctx_t**", ffi.cast("char*", steam_ctx_match) + 7)[0] or error("steam_ctx not found")
 
+local ISteamClient_mt =  {
+	this_ptr = ffi.cast("void***", steam_ctx.steam_client),
+	CreateSteamPipe = function(self)
+		return vmt_thunk(0, "HSteamPipe(__thiscall*)(void*)")(self.this_ptr)
+	end,
+	BReleaseSteamPipe = function(self,  hSteamPipe)
+		return vmt_thunk(1, "bool(__thiscall*)(void*, HSteamPipe)")(self.this_ptr,  hSteamPipe)
+	end,
+	ConnectToGlobalUser = function(self,  hSteamPipe)
+		return vmt_thunk(2, "HSteamUser(__thiscall*)(void*, HSteamPipe)")(self.this_ptr,  hSteamPipe)
+	end,
+	CreateLocalUser = function(self,  phSteamPipe, eAccountType)
+		return vmt_thunk(3, "HSteamUser(__thiscall*)(void*, HSteamPipe*, EAccountType)")(self.this_ptr,  phSteamPipe, eAccountType)
+	end,
+	ReleaseUser = function(self,  hSteamPipe, hUser)
+		return vmt_thunk(4, "void(__thiscall*)(void*, HSteamPipe, HSteamUser)")(self.this_ptr,  hSteamPipe, hUser)
+	end,
+	GetISteamUser = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(5, "ISteamUser*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamGameServer = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(6, "ISteamGameServer*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	SetLocalIPBinding = function(self,  unIP, usPort)
+		return vmt_thunk(7, "void(__thiscall*)(void*, uint32, uint16)")(self.this_ptr,  unIP, usPort)
+	end,
+	GetISteamFriends = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(8, "ISteamFriends*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamUtils = function(self,  hSteamPipe, pchVersion)
+		return vmt_thunk(9, "ISteamUtils*(__thiscall*)(void*, HSteamPipe, const char*)")(self.this_ptr,  hSteamPipe, pchVersion)
+	end,
+	GetISteamMatchmaking = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(10, "ISteamMatchmaking*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamMatchmakingServers = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(11, "ISteamMatchmakingServers*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamGenericInterface = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(12, "void*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamUserStats = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(13, "ISteamUserStats*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamGameServerStats = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(14, "ISteamGameServerStats*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamApps = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(15, "ISteamApps*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamNetworking = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(16, "ISteamNetworking*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamRemoteStorage = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(17, "ISteamRemoteStorage*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamScreenshots = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(18, "ISteamScreenshots*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamGameSearch = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(19, "ISteamGameSearch*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetIPCCallCount = function(self)
+		return vmt_thunk(20, "uint32(__thiscall*)(void*)")(self.this_ptr)
+	end,
+	SetWarningMessageHook = function(self,  pFunction)
+		return vmt_thunk(21, "void(__thiscall*)(void*, SteamAPIWarningMessageHook_t)")(self.this_ptr,  pFunction)
+	end,
+	BShutdownIfAllPipesClosed = function(self)
+		return vmt_thunk(22, "bool(__thiscall*)(void*)")(self.this_ptr)
+	end,
+	GetISteamHTTP = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(23, "ISteamHTTP*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamController = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(24, "ISteamController*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamUGC = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(25, "ISteamUGC*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamAppList = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(26, "ISteamAppList*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamMusic = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(27, "ISteamMusic*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamMusicRemote = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(28, "ISteamMusicRemote*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamHTMLSurface = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(29, "ISteamHTMLSurface*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamInventory = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(30, "ISteamInventory*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamVideo = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(31, "ISteamVideo*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamParentalSettings = function(self,  hSteamuser, hSteamPipe, pchVersion)
+		return vmt_thunk(32, "ISteamParentalSettings*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamuser, hSteamPipe, pchVersion)
+	end,
+	GetISteamInput = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(33, "ISteamInput*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+	GetISteamParties = function(self,  hSteamUser, hSteamPipe, pchVersion)
+		return vmt_thunk(34, "ISteamParties*(__thiscall*)(void*, HSteamUser, HSteamPipe, const char*)")(self.this_ptr,  hSteamUser, hSteamPipe, pchVersion)
+	end,
+}
 local ISteamUtils_mt =  {
 	this_ptr = ffi.cast("void***", steam_ctx.steam_utils),
 	GetSecondsSinceAppActive = function(self)
@@ -2095,6 +2203,7 @@ local ISteamVideo_mt =  {
 }
 
 return {
+	ISteamClient = ISteamClient_mt,
     ISteamAppList = ISteamAppList_mt,
     ISteamApps = ISteamApps_mt,
     ISteamController = ISteamController_mt,
