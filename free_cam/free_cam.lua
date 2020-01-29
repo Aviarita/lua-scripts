@@ -160,48 +160,49 @@ client.set_event_callback("paint", function(ctx)
         end
 
         local w2s = {world_to_screen(sx,sy,sz)}
-        local w2s2 = {world_to_screen(unpack(end_pos))}
 
-        if valid(w2s_table, {0}) then
-            text(w2s_table[0][1], w2s_table[0][2]-5, 255, 255, 255, 255, "cb", 0, "You")
-        end
-        
-        if valid(w2s_table, {0, 1, 6}) then 
-            --head and neck
-            line(w2s_table[0][1], w2s_table[0][2], w2s_table[1][1], w2s_table[1][2], 255, 255, 255, 255)
-            line(w2s_table[1][1], w2s_table[1][2], w2s_table[6][1], w2s_table[6][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {6, 17, 15, 4, 2}) then 
-            --arms
-            line(w2s_table[6][1], w2s_table[6][2], w2s_table[17][1], w2s_table[17][2], 255, 255, 255, 255)
-            line(w2s_table[6][1], w2s_table[6][2], w2s_table[15][1], w2s_table[15][2], 255, 255, 255, 255)
-            line(w2s_table[6][1], w2s_table[6][2], w2s_table[4][1], w2s_table[4][2], 255, 255, 255, 255)
-            line(w2s_table[4][1], w2s_table[4][2], w2s_table[2][1], w2s_table[2][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {2, 7, 8})then 
-            --waist
-            line(w2s_table[2][1], w2s_table[2][2], w2s_table[7][1], w2s_table[7][2], 255, 255, 255, 255)
-            line(w2s_table[2][1], w2s_table[2][2], w2s_table[8][1], w2s_table[8][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {7, 9, 11}) then 
-            --left leg
-            line(w2s_table[7][1], w2s_table[7][2], w2s_table[9][1], w2s_table[9][2], 255, 255, 255, 255)
-            line(w2s_table[9][1], w2s_table[9][2], w2s_table[11][1], w2s_table[11][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {8, 10, 12}) then 
-            --right leg
-            line(w2s_table[8][1], w2s_table[8][2], w2s_table[10][1], w2s_table[10][2], 255, 255, 255, 255)
-            line(w2s_table[10][1], w2s_table[10][2], w2s_table[12][1], w2s_table[12][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {17, 18, 14}) then 
-            --left arm
-            line(w2s_table[17][1], w2s_table[17][2], w2s_table[18][1], w2s_table[18][2], 255, 255, 255, 255)
-            line(w2s_table[18][1], w2s_table[18][2], w2s_table[14][1], w2s_table[14][2], 255, 255, 255, 255)
-        end
-        if valid(w2s_table, {15, 16, 13}) then 
-            --right arm
-            line(w2s_table[15][1], w2s_table[15][2], w2s_table[16][1], w2s_table[16][2], 255, 255, 255, 255)
-            line(w2s_table[16][1], w2s_table[16][2], w2s_table[13][1], w2s_table[13][2], 255, 255, 255, 255)
+        if valid(w2s, {1, 2}) then 
+            if valid(w2s_table, {0}) then
+                text(w2s_table[0][1], w2s_table[0][2]-5, 255, 255, 255, 255, "cb", 0, "You")
+            end
+            
+            if valid(w2s_table, {0, 1, 6}) then 
+                --head and neck
+                line(w2s_table[0][1], w2s_table[0][2], w2s_table[1][1], w2s_table[1][2], 255, 255, 255, 255)
+                line(w2s_table[1][1], w2s_table[1][2], w2s_table[6][1], w2s_table[6][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {6, 17, 15, 4, 2}) then 
+                --arms
+                line(w2s_table[6][1], w2s_table[6][2], w2s_table[17][1], w2s_table[17][2], 255, 255, 255, 255)
+                line(w2s_table[6][1], w2s_table[6][2], w2s_table[15][1], w2s_table[15][2], 255, 255, 255, 255)
+                line(w2s_table[6][1], w2s_table[6][2], w2s_table[4][1], w2s_table[4][2], 255, 255, 255, 255)
+                line(w2s_table[4][1], w2s_table[4][2], w2s_table[2][1], w2s_table[2][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {2, 7, 8})then 
+                --waist
+                line(w2s_table[2][1], w2s_table[2][2], w2s_table[7][1], w2s_table[7][2], 255, 255, 255, 255)
+                line(w2s_table[2][1], w2s_table[2][2], w2s_table[8][1], w2s_table[8][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {7, 9, 11}) then 
+                --left leg
+                line(w2s_table[7][1], w2s_table[7][2], w2s_table[9][1], w2s_table[9][2], 255, 255, 255, 255)
+                line(w2s_table[9][1], w2s_table[9][2], w2s_table[11][1], w2s_table[11][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {8, 10, 12}) then 
+                --right leg
+                line(w2s_table[8][1], w2s_table[8][2], w2s_table[10][1], w2s_table[10][2], 255, 255, 255, 255)
+                line(w2s_table[10][1], w2s_table[10][2], w2s_table[12][1], w2s_table[12][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {17, 18, 14}) then 
+                --left arm
+                line(w2s_table[17][1], w2s_table[17][2], w2s_table[18][1], w2s_table[18][2], 255, 255, 255, 255)
+                line(w2s_table[18][1], w2s_table[18][2], w2s_table[14][1], w2s_table[14][2], 255, 255, 255, 255)
+            end
+            if valid(w2s_table, {15, 16, 13}) then 
+                --right arm
+                line(w2s_table[15][1], w2s_table[15][2], w2s_table[16][1], w2s_table[16][2], 255, 255, 255, 255)
+                line(w2s_table[16][1], w2s_table[16][2], w2s_table[13][1], w2s_table[13][2], 255, 255, 255, 255)
+            end
         end
     end
 end)
