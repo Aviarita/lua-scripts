@@ -30,15 +30,22 @@ local get_highest_entity_by_index = ffi.cast("get_highest_entity_by_index_t", ie
 
 local old_name = ui.new_checkbox("visuals", "player esp", "Old name")
 local old_name_clr = ui.new_color_picker("visuals", "player esp", "Old name color", 255, 255, 255, 255)
+local old_name_font = ui.new_combobox("visuals", "player esp", "\nfont", {"Normal", "Bold"})
 local old_weapon_icons = ui.new_checkbox("visuals", "player esp", "Old Weapon Icons")
 local old_weapon_icons_clr = ui.new_color_picker("visuals", "player esp", "Old Weapon Icons color", 255, 255, 255, 255)
 
-local dropped_weapon_esp_checkbox = ui.new_checkbox("visuals", "other esp", "Old Dropped Weapons")
-local dropped_weapon_esp_color = ui.new_color_picker("visuals", "other esp", "Old Dropped Weapons", 255, 255, 255, 255)
+local dropped_weapon_esp_checkbox = ui.new_checkbox("visuals", "other esp", "Old dropped weapons")
+local dropped_weapon_esp_color = ui.new_color_picker("visuals", "other esp", "Old dropped weapons", 255, 255, 255, 255)
+local dropped_weapon_ammo_esp_checkbox = ui.new_checkbox("visuals", "other esp", "Old dropped weapons ammo")
+local dropped_weapon_ammo_esp_color = ui.new_color_picker("visuals", "other esp", "Old dropped weapons ammo", 56, 159, 252, 200)
+
 local teammates_ref = ui.reference("visuals", "player esp", "teammates")
 
 local ammo_ref = ui.reference("visuals", "player esp", "ammo")
 local distance_ref = ui.reference("visuals", "player esp", "distance")
+local weapon_text_ref = ui.reference("visuals", "player esp", "weapon text")
+local weapon_icon_ref = ui.reference("visuals", "player esp", "weapon icon")
+local dpi_scale_ref = ui.reference("misc", "settings", "dpi scale")
 
 local weapon_icon_char = {
     [1] = "F", -- Deagle
@@ -121,7 +128,31 @@ end
 local weapon_icons_font = renderer.create_font("Counter-Strike", 22, 400, {0x010,0x080})
 local bomb_icon_font = renderer.create_font("Counter-Strike", 18, 400, {0x010,0x080})
 local weapon_text_font = renderer.create_font("Small Fonts", 8, 350, {0x010,0x200})
-local name_font = renderer.create_font("Verdana", 12, 700, {0x080})
+local normal_font = renderer.create_font("Verdana", 12, 0, {0x080, 0x010})
+local bold_font = renderer.create_font("Verdana", 12, 700, {0x080})
+
+local function reinit_fonts(dpi, dpin)
+    weapon_icons_font = renderer.create_font("Counter-Strike", 22 * dpi, 400, {0x010,0x080})
+    bomb_icon_font = renderer.create_font("Counter-Strike", 18 * dpi, 400, {0x010,0x080})
+    weapon_text_font = renderer.create_font("Small Fonts", 8 * dpi, 350, {0x010,0x200})
+    normal_font = renderer.create_font("Verdana", 12 * dpin, 0, {0x080, 0x010})
+    bold_font = renderer.create_font("Verdana", 12 * dpin, 700, {0x080})
+end
+
+ui.set_callback(dpi_scale_ref, function(self)
+    local value = ui.get(self)
+    if value == "100%" then
+        reinit_fonts(1, 1.05)
+    elseif value == "125%" then
+        reinit_fonts(1.5, 1.1)
+    elseif value == "150%" then
+        reinit_fonts(2, 1.2)
+    elseif value == "175%" then
+        reinit_fonts(2.5, 1.3)
+    elseif value == "200%" then
+        reinit_fonts(3, 1.4)
+    end
+end)
 
 local function draw_weapon_icons(ent)
 
@@ -137,6 +168,14 @@ local function draw_weapon_icons(ent)
 
     if ui.get(distance_ref) then
         y1 = y1 + 6
+    end
+
+    if ui.get(weapon_text_ref) then
+        y1 = y1 + 11
+    end
+
+    if ui.get(weapon_icon_ref) then
+        y1 = y1 + 16
     end
 
     local r, g, b, a = ui.get(old_weapon_icons_clr)
@@ -174,11 +213,13 @@ local function draw_name(ent)
         name = name:sub(0, 15)
     end
 
-    local wide, tall = renderer.get_text_size(name_font, name)
+    local font = ui.get(old_name_font) == "Normal" and normal_font or bold_font
+
+    local wide, tall = renderer.get_text_size(font, name)
 
     local middle_x = (x0 - x1) / 2
     x0 = x0 - wide / 2
-    renderer.draw_text(x0 - middle_x, y0-13, r, g, b, a, name_font, name)
+    renderer.draw_text(x0 - middle_x, y0-tall, r, g, b, a, font, name)
 end
 
 local function draw_old_dropped_weapon_esp(ent, entptr)
@@ -212,41 +253,35 @@ local function draw_old_dropped_weapon_esp(ent, entptr)
     end
 
     if wx ~= nil then
+
         local tw,th = renderer.get_text_size(font, weapon_char)
 
-        local add = wx
+        local dist = round_to_fifth(get_distance_in_feet(lpx, lpy, lpz, epx, epy, epz)) .. "FT"
+        local dw, dh = renderer.get_text_size(weapon_text_font, dist)
 
-        if is_defuser then 
-            add = 2.5
-        elseif is_bomb then 
-            add = 2
-        else
-            add = 0
-        end
-
-        renderer.draw_text(wx - tw/6 + add, wy, r, g, b, a, font, weapon_char)
+        renderer.draw_text(wx - (dw*.5), wy, r, g, b, a, weapon_text_font, dist)
 
         local old_wy = wy
-        if font == weapon_text_font then 
-            wy = wy + 1
-        end
+        if font == weapon_icons_font then 
+            wy = wy - (dh*.5)
+        end 
 
-        local width = tw * ammo_percentage
-        renderer.draw_filled_rect(wx - tw/6, wy + th / 1.15, tw + 1, 4, 0, 0, 0, 200)
-        renderer.draw_filled_rect(wx - tw/6 + 1, wy + th / 1.15 + 1, width - 1, 2, 56, 159, 252, 200)
+        renderer.draw_text(wx - (tw*.5), wy + dh, r, g, b, a, font, weapon_char)
 
         wy = old_wy
 
         if font == weapon_text_font then 
-            wy = wy - 8
-        else
-            wy = wy - 5
+            wy = wy + dh
+        end 
+
+        if ui.get(dropped_weapon_ammo_esp_checkbox) and iClip1 ~= -1 then 
+            local width = tw * ammo_percentage
+            local r,g,b,a = ui.get(dropped_weapon_ammo_esp_color)
+            renderer.draw_filled_rect(wx - (tw*.5),       wy + th,       tw + 1, 4, 0, 0, 0, 200)
+            renderer.draw_filled_rect(wx - (tw*.5) + 1, wy + th + 1, width - 1, 2, r, g, b, a)
         end
-        renderer.draw_text(wx, wy, r, g, b, a, weapon_text_font, round_to_fifth(get_distance_in_feet(lpx, lpy, lpz, epx, epy, epz)) .. "FT")
     end
-
 end
-
 
 client.set_event_callback("paint", function()
     for player=1, globals.maxplayers() do
@@ -264,16 +299,15 @@ client.set_event_callback("paint", function()
         if rawent ~= nil then 
             local ent = ffi.cast(ffi.typeof("void***"), rawent)
             if ent ~= nil then 
-                -- something here crashes on community servers but doesnt on local servers, dont know what it is
-                -- guessing its trying to call vtable func 165 for an entity that isnt from c_base_entity and crashes
                 local classname = entity.get_classname(i)
-                if classname:find("CWeapon") or classname:find("CAK") or classname:find("CDEagle") then 
+                if classname:find("CWeapon") 
+                    or classname:find("CAK") 
+                    or classname:find("CC4") 
+                    or classname:find("Grenade") 
+                    or classname:find("Flashbang") 
+                    or classname:find("CDEagle") then 
                     local is_weapon = ffi.cast("is_weapon_t", ent[0][165])
-                    local x,y = renderer.world_to_screen(entity.get_prop(i, "m_vecOrigin"))
-                    if x then 
-                       -- renderer.draw_text(x, y, 255, 255, 255, 255, 2, classname)
-                    end
-                    if is_weapon(ent) ~= nil then 
+                    if is_weapon(ent) then 
                         if ui.get(dropped_weapon_esp_checkbox) then 
                             draw_old_dropped_weapon_esp(i, ent)
                         end
