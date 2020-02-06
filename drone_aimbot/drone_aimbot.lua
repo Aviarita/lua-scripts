@@ -2,9 +2,9 @@ local drone_aimbot = ui.new_checkbox("lua", "b", "Drone aimbot")
 local aimbot_hotkey = ui.new_hotkey("lua", "b", "Drone aimbot", true)
 local aimbot_silent_aim = ui.new_checkbox("lua", "b", "Silent aim")
 
-local eye_position, camera_angles = client.eye_position, client.camera_angles
+local eye_position, camera_angles, visible, trace_line = client.eye_position, client.camera_angles, client.visible, client.trace_line
 local text, world_to_screen = renderer.text, renderer.world_to_screen
-local get_prop, get_all = entity.get_prop, entity.get_all
+local get_prop, get_all, get_local_player = entity.get_prop, entity.get_all, entity.get_local_player
 local deg, atan2, sqrt = math.deg, math.atan2, math.sqrt
 local get = ui.get
 
@@ -40,14 +40,36 @@ local function vector_angles(x1, y1, z1, x2, y2, z2)
     end
 end
 
+local function get_dist(a_x, a_y, a_z, b_x, b_y, b_z)
+    return math.sqrt(math.pow(a_x - b_x, 2) + math.pow(a_y - b_y, 2) + math.pow(a_z - b_z, 2))
+end
+
+local function get_closest_drone()
+	local target = nil
+	local min_distance = 8192
+	local me = get_local_player()
+	local mx,my,mz = get_prop(me, "m_vecAbsOrigin")
+    for _, ent in pairs(get_all("CDrone")) do
+        local x,y,z = get_prop(ent, "m_vecOrigin")
+        local distance = get_dist(mx,my,mz,x,y,z)
+        local frac = trace_line(me, mx,my,mz,x,y,z)
+		if distance < min_distance and frac < 1 and frac > 0.9 then
+			min_distance = distance
+			target =ent
+		end
+    end
+	return target
+end
+
 local cur_target = nil
 client.set_event_callback("setup_command", function(cmd)
     if get(drone_aimbot) then 
-        for _, ent in pairs(get_all("CDrone")) do
-            local x,y,z = get_prop(ent, "m_vecOrigin")
+        local target = get_closest_drone()
+        if target then 
+            local x,y,z = get_prop(target, "m_vecOrigin")
             local pitch, yaw = vector_angles(x,y,z)
             if get(aimbot_hotkey) then 
-                cur_target = ent
+                cur_target = target
                 if get(aimbot_silent_aim) then 
                     cmd.pitch = pitch
                     cmd.yaw = yaw
@@ -69,7 +91,7 @@ client.set_event_callback("paint", function(ctx)
                     if ent == cur_target then 
                         r,g,b = 255,0,0
                     end
-                    text(wx, wy, r, g, b, 255, "-", 999, "DRONE")
+                    text(wx, wy, r, g, b, 255, "-", 999, "Drone")
                 end
             end
         end
