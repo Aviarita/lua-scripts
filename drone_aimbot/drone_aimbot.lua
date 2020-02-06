@@ -69,7 +69,7 @@ client.set_event_callback("paint", function(ctx)
                     if ent == cur_target then 
                         r,g,b = 255,0,0
                     end
-                    text(wx, wy, r, g, b, 255, "-", 999, "Drone")
+                    text(wx, wy, r, g, b, 255, "-", 999, "DRONE")
                 end
             end
         end
