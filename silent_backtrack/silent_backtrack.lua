@@ -30,6 +30,10 @@ end
 
 local function player_death(event) 
     local opfer = client.userid_to_entindex(event.userid)
+    local attacker = client.userid_to_entindex(event.attacker)
+    if attacker ~= entity.get_local_player() then
+       return
+    end
     local x2, y2, z2 = unpack(positions[opfer])
     client.delay_call(0.00001, function()
         local ragdolls = entity.get_all("CCSRagdoll")
