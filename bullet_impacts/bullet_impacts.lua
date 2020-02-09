@@ -62,7 +62,9 @@ client.set_event_callback("aim_fire", function(e)
 end)
 
 client.set_event_callback("bullet_impact", function(e)
-    if ui.get(bullet_impacts) then 
+	local entindex = client.userid_to_entindex(e.userid)
+    local me = entity.get_local_player()
+    if entindex == me and ui.get(bullet_impacts) then 
         draw_impact(e.x,e.y,e.z, server_color)
     end
 end)
