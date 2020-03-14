@@ -1,5 +1,5 @@
 -----------------------------------------------------------------
-local sound = "ui/beepclear" -- Thats the sound you will heart --
+local sound = "ui/beepclear" -- Thats the sound you will hear --
 ----------------------------------------------------------------- 
 
 local checkbox = ui.new_checkbox("visuals", "player esp", "Sound esp")
