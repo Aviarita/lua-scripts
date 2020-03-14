@@ -3,7 +3,7 @@ local sound = "ui/beepclear" -- Thats the sound you will heart --
 ----------------------------------------------------------------- 
 
 local checkbox = ui.new_checkbox("visuals", "player esp", "Sound esp")
-local min_distance = ui.new_slider("visuals", "player esp", "Min distance", 0, 1500, 700)
+local min_distance = ui.new_slider("visuals", "player esp", "Min distance", 0, 500, 100, true, "ft")
 local volume = ui.new_slider("visuals", "player esp", "Volume", 0, 100, 50, true, "%")
 
 local GetUi = ui.get
@@ -13,7 +13,9 @@ local GetProp = entity.get_prop
 local AddEvent = client.set_event_callback
 local MaxPlayers = globals.maxplayers
 
-local function distance3d(a, b) return math.ceil(math.sqrt(math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2) + math.pow(a.z - b.z, 2))) end
+local function distance3d(a, b) 
+    return math.ceil(math.sqrt(math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2) + math.pow(a.z - b.z, 2)) * 0.0254 / 0.3048) 
+end
 
 local last_tickcount = 0
 
