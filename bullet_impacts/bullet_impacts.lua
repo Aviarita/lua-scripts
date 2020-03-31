@@ -107,7 +107,7 @@ client.set_event_callback("weapon_fire", function(e)
 
         local wpnent = cast(voidptr, get_client_entity(ientitylist, get_player_weapon(me)))
         if wpnent == nil then return end
-        local get_ccs_weapon_info = cast("get_ccs_weapon_info_t", wpnent[0][459])
+        local get_ccs_weapon_info = cast("get_ccs_weapon_info_t", wpnent[0][460])
         local ccsweaponinfo = get_ccs_weapon_info(wpnent)
         local range = ccsweaponinfo.flRange
 
