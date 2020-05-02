@@ -1,5 +1,4 @@
-local js = require("access_panorama")
-
+local js = panorama.loadstring
 local customplayers = {
 	{"Local T Agent", "models/player/custom_player/legacy/tm_phoenix.mdl", false},
 	{"Local CT Agent", "models/player/custom_player/legacy/ctm_sas.mdl", false},
@@ -212,9 +211,9 @@ local model_reference = ui.new_listbox("Lua", "b", "Replace main menu model", "N
 local show_fortnite_dances = ui.new_checkbox("Lua", "b", "Show fortnite emotes")
 local dance_reference = ui.new_listbox("Lua", "b", "Fornite dances", "None", unpack(dance_names))
 
-js.eval([[
+js([[
     var model = $.GetContextPanel().GetChild(0).FindChildInLayoutFile( 'JsMainmenu_Vanity' );
-]])
+]])()
 
 ui.set_visible(model_reference, false)
 ui.set_visible(dance_reference, false)
@@ -230,29 +229,29 @@ local function do_dance()
         	return
     	end
     if ui.get(model_reference) == 0 then 
-        js.eval([[
+        js([[
             model.visible = false;
-        ]])
+        ]])()
         return
     end
 
     local model_path, custom_model = unpack(model_paths[model_names[ui.get(model_reference)]])
     local dance = dance_strings[dance_names[ui.get(dance_reference)]]
 
-    js.eval([[
+    js([[
         model.visible = true;
-    ]])
+    ]])()
     
-    js.eval([[
+    js([[
         model.SetScene("resource/ui/econ/ItemModelPanelCharMainMenu.res", "models/player/custom_player/legacy/ctm_sas.mdl", false)
         model.SetSceneModel("]]..model_path..[[")
-    ]])
+    ]])()
 
     if dance ~= nil and custom_model == false then
-        js.eval([[
+        js([[
             model.SetScene("resource/ui/fornite_dances.res", "]]..model_path..[[", false)
             model.PlaySequence("]]..dance..[[", true)
-        ]])
+        ]])()
     end
 end
 
